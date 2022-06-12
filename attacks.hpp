@@ -1,101 +1,36 @@
-#include <iostream>
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h> 
-#include <math.h>  
-#include <bits/stdc++.h> 
-#include <vector>
-#include <array>
-#include <string>
-#include <sstream>
+#include "board.hpp"
+#ifndef Attacks_HPP
+#define Attacks_HPP
 
-using namespace std;
-using namespace std::chrono;
-using U64 = uint64_t;
+namespace Attacks {
+const vector<int> KNIGHT_DELTAS = {17, 15, 10, 6, -17, -15, -10, -6};
+const vector<int> KING_DELTAS = {9, 8, 7, 1, -9, -8, -7, -1};
+const vector<int> DIAG_DELTAS = {9, 7, -7, -9};
+const vector<int> LINE_DELTAS = {8, 1, -1, -8};
 
-//Common bit formulas
-#define SET_BIT(board,square) ((board) |= (1ULL<<(square)))
-#define CLEAR_BIT(board,square) ((board) &= ~(1ULL<<(square)))
-#define FLIP_BIT(board,square) ((board) ^= (1ULL<<(square)))
-#define CHECK_BIT(board,square) (!!((board) & (1ULL<<(square)))) 
+extern U64 SQUARES_BB[64]; 
+extern U64 FILES_BB[8], RANKS_BB[8];
 
-#define BITMASK_SET(board, mask) ((board) |= (mask))
-#define BITMASK_CLEAR(board, mask) ((board) &= (~(mask)))
-#define BITMASK_INTERSECT(board, mask) ((board) &= (mask))
-#define BITMASK_FLIP(board, mask) ((board) ^= (mask))
-// #define BITMASK_CHECK_ALL(board, mask) (!(~(board) & (mask)))
-// #define BITMASK_CHECK_ANY(board, mask) ((board) & (mask))
-//Constants
-int PAWN_I = 0, KNIGHT_I = 1, BISHOP_I = 2, ROOK_I = 3, QUEEN_I = 4, KING_I = 5, WHITE = 0, BLACK = 1;
-vector<int> KNIGHT_DELTAS = {17, 15, 10, 6, -17, -15, -10, -6};
-vector<int> KING_DELTAS = {9, 8, 7, 1, -9, -8, -7, -1};
-vector<int> DIAG_DELTAS = {9, 7, -7, -9};
-vector<int> LINE_DELTAS = {8, 1, -1, -8};
-const U64 EMPTY_BB = 0ULL;
-const U64 ALL_BB = 0xFFFFFFFFFFFFFFFFULL;
-U64 RANK_5 = 0x000000FF00000000ULL, RANK_4 = 0x00000000FF000000ULL;
-U64 RANK_8 = 0xFF00000000000000ULL,RANK_1 = 0x00000000000000FFULL;
-U64 FILE_A = 0x8080808080808080ULL, FILE_H = 0x0101010101010101ULL;
-U64 FILES_BB[8], RANKS_BB[8];
-U64 EDGES = RANK_1 | RANK_8 | FILE_A | FILE_H;
-U64 CORNERS = 0x8100000000000081ULL;
-U64 SQUARES_BB[64]; 
+extern U64 DIAG_MASKS[64];
+extern U64 LINE_MASKS[64];
 
-U64 DIAG_MASKS[64];
-U64 LINE_MASKS[64];
+extern U64 KNIGHT_ATTACKS[64], KING_ATTACKS[64], PAWN_ATTACKS[2][64];
+extern U64 DIAG_ATTACKS[64][512];
+extern U64 LINE_ATTACKS[64][4096];
 
-U64 KNIGHT_ATTACKS[64], KING_ATTACKS[64], PAWN_ATTACKS[2][64];
-U64 DIAG_ATTACKS[64][512];
-U64 LINE_ATTACKS[64][4096];
-
-//Useful arrays
-const string FEN_PIECE_STRINGS[2][6] = {{"P", "N", "B", "R", "Q", "K"}, {"p", "n", "b", "r", "q", "k"}};
-const string SQUARES[64] = {"a8", "b8", "c8","d8","e8","f8","g8","h8",
-                      "a7", "b7", "c7","d7","e7","f7","g7","h7",
-                      "a6", "b6", "c6","d6","e6","f6","g6","h6",
-                      "a5", "b5", "c5","d5","e5","f5","g5","h5",
-                      "a4", "b4", "c4","d4","e4","f4","g4","h4",
-                      "a3", "b3", "c3","d3","e3","f3","g3","h3",
-                      "a2", "b2", "c2","d2","e2","f2","g2","h2",
-                      "a1", "b1", "c1","d1","e1","f1","g1","h1"};
-                      
-//Assisting functions
-void init_bb_values() {
-  //Initilize the square bitboard
-  for (int i = 0; i < 64; i++) {
-    SQUARES_BB[i] = 1ULL << i; 
-  }
-  //Initialize ranks and files in bb 
-  for (int i = 0; i < 8; i++) {
-    FILES_BB[i] = 0x0101010101010101ULL << i;
-    RANKS_BB[i] = 0xff << (8 * i);
-  }
-}
+int board_distance(int square_1, int square_2);
 
 
-//Gets maximum distance between 2 squares whether that be rows or cols on chess board
-int board_distance(int square_1, int square_2) {
-    int row_dif, col_dif;
-    row_dif = abs(square_2 / 8 - square_1 / 8);
-    col_dif = abs(square_2 % 8 - square_1 % 8);
-    return max(row_dif, col_dif);
-} 
+void init_bb_values();
+void init_step_tables();
+void init_diag_tables();
+void init_line_tables();
+void init();
 
-//Counts bits
-inline int count_bits(U64 bitboard) {
-  int count = 0;
-  while (bitboard) {
-    count++;
-    bitboard &= bitboard - 1;
-  }
-  return count;
-}
+U64 get_blockers(int index, int bits, U64 mask);
+U64 get_edges(int square);
+U64 sliding_attacks(int square, U64 occupied, vector<int> deltas);
 
-inline int pop_lsb(U64 &bitboard) {
-    int index = __builtin_ctzll(bitboard);
-    bitboard &= bitboard - 1;
-    return (index - 1);
-}
 //Initilize the magics
 //(Using magics from https://github.com/maksimKorzh/chess_programming)
 const U64 diag_magics[64] = {
@@ -232,7 +167,7 @@ const U64 line_magics[64] = {
     0x1004081002402ULL
 };
 
-int diag_relevant_bits[64] = {
+const int diag_relevant_bits[64] = {
   6, 5, 5, 5, 5, 5, 5, 6,
   5, 5, 5, 5, 5, 5, 5, 5,
   5, 5, 7, 7, 7, 7, 5, 5,
@@ -242,7 +177,7 @@ int diag_relevant_bits[64] = {
   5, 5, 5, 5, 5, 5, 5, 5,
   6, 5, 5, 5, 5, 5, 5, 6};
 
-int line_relevant_bits[64] = {
+const int line_relevant_bits[64] = {
   12, 11, 11, 11, 11, 11, 11, 12,
   11, 10, 10, 10, 10, 10, 10, 11,
   11, 10, 10, 10, 10, 10, 10, 11,
@@ -252,4 +187,26 @@ int line_relevant_bits[64] = {
   11, 10, 10, 10, 10, 10, 10, 11,
   12, 11, 11, 11, 11, 11, 11, 12};
 
+inline U64 get_diag_attacks(int square, U64 blockers) {
+  blockers &= DIAG_MASKS[square];
+  blockers *= diag_magics[square];
+  blockers >>= 64 - diag_relevant_bits[square];
+  return DIAG_ATTACKS[square][blockers];
+}
 
+inline U64 get_line_attacks(int square, U64 blockers) {
+  blockers &= LINE_MASKS[square];
+  blockers *= line_magics[square];
+  blockers >>= 64 - line_relevant_bits[square];
+  
+  return LINE_ATTACKS[square][blockers];
+}
+
+inline U64 get_queen_attacks(int square, U64 blockers) {
+  return get_diag_attacks(square, blockers) | get_line_attacks(square, blockers);
+}
+}
+
+
+
+#endif
