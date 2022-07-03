@@ -36,6 +36,8 @@ const U64 RANK_8 = 0xFF00000000000000ULL,RANK_1 = 0x00000000000000FFULL;
 const U64 FILE_A = 0x8080808080808080ULL, FILE_H = 0x0101010101010101ULL;
 const U64 CORNERS = 0x8100000000000081ULL;
 const U64 EDGES = RANK_1 | RANK_8 | FILE_A | FILE_H;
+const U64 CASTLING_BB[2][2] = {{(1ULL<<(64-3) | 1ULL<<(64-2)), (1ULL<<(64-7) | 1ULL<<(64-6) | 1ULL<<(64-5)) }, 
+      {(1ULL<<(3) | 1ULL<<(2)), (1ULL<<(7) | 1ULL<<(6) | 1ULL<<(5)) }};
 
 
 //Useful arrays
@@ -72,8 +74,10 @@ class Board {
     U64 piece_boards[2][6] = {EMPTY_BB};
     U64 piece_co[2] = {EMPTY_BB};
     void set_fen(string fen_set);
+    vector<Moves> generate_castling_moves();
     vector<Moves> generate_piece_quiets();
     vector<Moves> generate_piece_captures();
+
 };
                    
 //Counts bits

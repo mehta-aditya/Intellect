@@ -1,5 +1,11 @@
 #include "attacks.hpp"
 
+vector<Moves> Board::generate_castling_moves(){
+  if (!turn == WHITE) {
+    
+  }
+}
+
 vector<Moves> Board::generate_piece_quiets(){
   int from_square, to_square;
   int color_to_move = !turn; //0 is white and 1 is black
