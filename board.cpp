@@ -39,10 +39,10 @@ void Board::set_fen(string fen_set){
           // Side to move fen
           else if (i == 1) {
             if (fen_list[i] == "w") {
-              turn = true;
+              turn = WHITE;
             }
             else {
-              turn = false;
+              turn = BLACK;
             }
           }
           //Castling rights fen
@@ -87,6 +87,8 @@ void Board::set_fen(string fen_set){
         }
       } 
       
+
+
 //Show given bitboard
 void basic_rendering(U64 &bitboard) {
   cout << bitboard << endl;

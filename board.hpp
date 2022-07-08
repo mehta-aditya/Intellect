@@ -67,13 +67,15 @@ struct Moves {
 //The chess board
 class Board {
   public:
-    bool turn = true;
+    int turn = WHITE;
     bool castling_rights[2][2]; //[color][types] .//[0:White or 1: Black][0:Kingside or 1:Queenside]
     int ep_square;
     //No Piece, WP, WN, WB, WR, WQ, WK, BP, BN, BB, BR, BQ, BK
     U64 piece_boards[2][6] = {EMPTY_BB};
     U64 piece_co[2] = {EMPTY_BB};
     void set_fen(string fen_set);
+    vector<Moves> is_square_attacked();
+
     vector<Moves> generate_castling_moves();
     vector<Moves> generate_piece_quiets();
     vector<Moves> generate_piece_captures();
