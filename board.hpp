@@ -38,6 +38,7 @@ const U64 CORNERS = 0x8100000000000081ULL;
 const U64 EDGES = RANK_1 | RANK_8 | FILE_A | FILE_H;
 const U64 CASTLING_BB[2][2] = {{(1ULL<<(64-3) | 1ULL<<(64-2)), (1ULL<<(64-7) | 1ULL<<(64-6) | 1ULL<<(64-5)) }, 
       {(1ULL<<(3) | 1ULL<<(2)), (1ULL<<(7) | 1ULL<<(6) | 1ULL<<(5)) }};
+const U64 CASTLING_SQUARES[2][2][3] = {{{60, 61, 62}, {60, 59, 58}}, {{4, 5, 6}, {4, 3, 2}}}
 
 
 //Useful arrays
