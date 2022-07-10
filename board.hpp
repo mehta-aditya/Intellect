@@ -26,7 +26,8 @@ using U64 = uint64_t;
 enum I {
   PAWN_I = 0, KNIGHT_I = 1, BISHOP_I = 2, ROOK_I = 3, QUEEN_I = 4, KING_I = 5, 
   WHITE = 0, BLACK = 1,
-  KINGSIDE_I = 0, QUEENSIDE_I = 1
+  KINGSIDE_I = 0, QUEENSIDE_I = 1,
+  NO_SQ = -1
 };
 
 const U64 EMPTY_BB = 0ULL;
@@ -38,7 +39,7 @@ const U64 CORNERS = 0x8100000000000081ULL;
 const U64 EDGES = RANK_1 | RANK_8 | FILE_A | FILE_H;
 const U64 CASTLING_BB[2][2] = {{(1ULL<<(64-3) | 1ULL<<(64-2)), (1ULL<<(64-7) | 1ULL<<(64-6) | 1ULL<<(64-5)) }, 
       {(1ULL<<(3) | 1ULL<<(2)), (1ULL<<(7) | 1ULL<<(6) | 1ULL<<(5)) }};
-const U64 CASTLING_SQUARES[2][2][3] = {{{60, 61, 62}, {60, 59, 58}}, {{4, 5, 6}, {4, 3, 2}}}
+const U64 CASTLING_SQUARES[2][2][3] = {{{60, 61, 62}, {60, 59, 58}}, {{4, 5, 6}, {4, 3, 2}}};
 
 
 //Useful arrays
@@ -55,8 +56,8 @@ const string SQUARES[64] = {"a8", "b8", "c8","d8","e8","f8","g8","h8",
 //Structure for a move
 struct Moves {
   //0: No Flag 1:Castling 2: En Passant 3: Promotion
-  int from_square = -1, to_square = -1, captured = 0, flag = 0, promoted = 0;
-  Moves(int from = -1, int to = -1, int cap = 0, int f = 0, int pro = 0) {
+  int from_square = NO_SQ, to_square = NO_SQ, captured = 0, flag = 0, promoted = 0;
+  Moves(int from = NO_SQ, int to = NO_SQ, int cap = -1, int f = 0, int pro = PAWN_I) {
     from_square = from;
     to_square = to;
     captured = cap;
@@ -75,7 +76,7 @@ class Board {
     U64 piece_boards[2][6] = {EMPTY_BB};
     U64 piece_co[2] = {EMPTY_BB};
     void set_fen(string fen_set);
-    vector<Moves> is_square_attacked();
+    bool is_square_attacked(int move);
 
     vector<Moves> generate_castling_moves();
     vector<Moves> generate_piece_quiets();
@@ -92,15 +93,22 @@ inline int count_bits(U64 bitboard) {
   }
   return count;
 }
+//Gets index of least lsb
+inline int get_lsb(U64 bb) {
+    int i = __builtin_ctzll(bb);
+    return i;
+}
+
+
 //Gets index of least lsb and turns it to 0
-inline int pop_lsb(U64* x) {
-    int i = __builtin_ctzll(*x);
-    *x &= *x - 1;
+inline int pop_lsb(U64* bb) {
+    int i = __builtin_ctzll(*bb);
+    *bb &= *bb - 1;
     return i;
 }
 
 //Renders a bitbaord
-void basic_rendering(U64 &bitboard);
+void basic_rendering(U64 bitboard);
 
 
 

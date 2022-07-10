@@ -68,7 +68,7 @@ void Board::set_fen(string fen_set){
           //Ep square fen
           else if (i == 3) {
             if (fen_list[i] == "-") {
-              ep_square = -1;
+              ep_square = NO_SQ;
             }
             else {
               for (int j = 0; j < 64; j++) {
@@ -90,7 +90,7 @@ void Board::set_fen(string fen_set){
 
 
 //Show given bitboard
-void basic_rendering(U64 &bitboard) {
+void basic_rendering(U64 bitboard) {
   cout << bitboard << endl;
   cout << "" << endl;
   for (int row = 0; row < 8; row++) {
