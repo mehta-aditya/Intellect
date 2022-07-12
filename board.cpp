@@ -1,5 +1,5 @@
 #include "board.hpp"
-
+//Set board position using the FEN (Forsyth–Edwards Notation)
 void Board::set_fen(string fen_set){
         //Split the fen into a vector
         vector<string> fen_list;
@@ -89,8 +89,47 @@ void Board::set_fen(string fen_set){
       
 
 
+
+
+
+
+
+
+
+
+
+
+//Helper Function
+
+void Board::render(){
+  Piece render_list[64] = {Piece()};
+  for (int c = WHITE; c <= BLACK; c++) {
+    for (int p = PAWN_I; p <= KING_I; p++){
+      for (int s = 0; s < 64; s++) {
+        if (CHECK_BIT(piece_boards[c][p], s)) {
+          render_list[s] = Piece(c, p);
+        }
+      }
+    }
+  }
+
+  for (int row = 0; row < 8; row++) {
+    cout << abs(row - 8) << " ";
+    for (int col = 0; col < 8; col++) {
+      int square = row * 8 + col;
+      if (render_list[square].type == NO_PIECE){
+        cout << "." << " ";
+      }
+      else {
+        cout << UNICODE_PIECES[render_list[square].color][render_list[square].type] << " ";
+      }
+    }
+  cout << endl;
+  }
+  cout << "  a b c d e f g h";
+}
 //Show given bitboard
-void basic_rendering(U64 bitboard) {
+void bb_rendering(U64 bitboard) {
   cout << bitboard << endl;
   cout << "" << endl;
   for (int row = 0; row < 8; row++) {

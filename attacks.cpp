@@ -1,6 +1,5 @@
 #include "attacks.hpp"
-
-U64 Attacks::SQUARES_BB[64]; 
+U64 SQUARES_BB[64];
 U64 Attacks::FILES_BB[8], Attacks::RANKS_BB[8];
 
 U64 Attacks::DIAG_MASKS[64];
@@ -17,8 +16,6 @@ int Attacks::board_distance(int square_1, int square_2) {
     col_dif = abs(square_2 % 8 - square_1 % 8);
     return max(row_dif, col_dif);
 } 
-
-//Initialize the bitboard values
 void Attacks::init_bb_values() {
   //Initilize the square bitboard
   for (int i = 0; i < 64; i++) {

@@ -2,13 +2,20 @@
 #ifndef Attacks_HPP
 #define Attacks_HPP
 
+const U64 RANK_5 = 0x000000FF00000000ULL, RANK_4 = 0x00000000FF000000ULL;
+const U64 RANK_8 = 0xFF00000000000000ULL,RANK_1 = 0x00000000000000FFULL;
+const U64 FILE_A = 0x8080808080808080ULL, FILE_H = 0x0101010101010101ULL;
+const U64 CORNERS = 0x8100000000000081ULL;
+const U64 EDGES = RANK_1 | RANK_8 | FILE_A | FILE_H;
+
 namespace Attacks {
 const vector<int> KNIGHT_DELTAS = {17, 15, 10, 6, -17, -15, -10, -6};
 const vector<int> KING_DELTAS = {9, 8, 7, 1, -9, -8, -7, -1};
 const vector<int> DIAG_DELTAS = {9, 7, -7, -9};
 const vector<int> LINE_DELTAS = {8, 1, -1, -8};
 
-extern U64 SQUARES_BB[64]; 
+
+
 extern U64 FILES_BB[8], RANKS_BB[8];
 
 extern U64 DIAG_MASKS[64];
@@ -30,6 +37,29 @@ void init();
 U64 get_blockers(int index, int bits, U64 mask);
 U64 get_edges(int square);
 U64 sliding_attacks(int square, U64 occupied, vector<int> deltas);
+
+
+//Counts bits
+inline int count_bits(U64 bitboard) {
+  int count = 0;
+  while (bitboard) {
+    count++;
+    bitboard &= bitboard - 1;
+  }
+  return count;
+}
+//Gets index of least lsb
+inline int get_lsb(U64 bb) {
+    int i = __builtin_ctzll(bb);
+    return i;
+}
+
+//Gets index of least lsb and turns it to 0
+inline int pop_lsb(U64* bb) {
+    int i = __builtin_ctzll(*bb);
+    *bb &= *bb - 1;
+    return i;
+}
 
 //Initilize the magics
 //(Using magics from https://github.com/maksimKorzh/chess_programming)
@@ -166,7 +196,7 @@ const U64 line_magics[64] = {
     0x2006104900a0804ULL,
     0x1004081002402ULL
 };
-
+//Relevant bits which are important for getting attack boards
 const int diag_relevant_bits[64] = {
   6, 5, 5, 5, 5, 5, 5, 6,
   5, 5, 5, 5, 5, 5, 5, 5,
@@ -187,6 +217,7 @@ const int line_relevant_bits[64] = {
   11, 10, 10, 10, 10, 10, 10, 11,
   12, 11, 11, 11, 11, 11, 11, 12};
 
+//Generate the attacks for a square given the blockers in the positions
 inline U64 get_diag_attacks(int square, U64 blockers) {
   blockers &= DIAG_MASKS[square];
   blockers *= diag_magics[square];

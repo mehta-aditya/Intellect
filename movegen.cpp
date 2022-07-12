@@ -1,5 +1,8 @@
 #include "attacks.hpp"
-
+const U64 CASTLING_BB[2][2] = {{(1ULL<<(64-3) | 1ULL<<(64-2)), (1ULL<<(64-7) | 1ULL<<(64-6) | 1ULL<<(64-5)) }, 
+      {(1ULL<<(3) | 1ULL<<(2)), (1ULL<<(7) | 1ULL<<(6) | 1ULL<<(5)) }};
+const U64 CASTLING_SQUARES[2][2][3] = {{{60, 61, 62}, {60, 59, 58}}, {{4, 5, 6}, {4, 3, 2}}};
+//Check if the square is attacked (useful for checking for checks checks)
 bool Board::is_square_attacked(int square) {
   U64 attack_board;
   int opp_col = turn^1;
@@ -41,7 +44,7 @@ vector<Moves> Board::generate_castling_moves(){
     //Check if pieces in between are clear and castling is allowed
     if (!(CASTLING_BB[turn][KINGSIDE_I] & piece_co[turn])) {
       if (!is_square_attacked(CASTLING_SQUARES[turn][KINGSIDE_I][0]) && !is_square_attacked(CASTLING_SQUARES[turn][KINGSIDE_I][1]) && !is_square_attacked(CASTLING_SQUARES[turn][KINGSIDE_I][2])) {
-        move_list.push_back(Moves(CASTLING_SQUARES[turn][KINGSIDE_I][0], CASTLING_SQUARES[turn][KINGSIDE_I][2], -1, 1));
+        move_list.push_back(Moves(CASTLING_SQUARES[turn][KINGSIDE_I][0], CASTLING_SQUARES[turn][KINGSIDE_I][2], KING_I, KS_F));
       }
     }
   }
@@ -49,7 +52,7 @@ vector<Moves> Board::generate_castling_moves(){
     //Check if pieces in between are clear and castling is allowed
     if (!(CASTLING_BB[turn][QUEENSIDE_I] & piece_co[turn])) {
       if (!is_square_attacked(CASTLING_SQUARES[turn][QUEENSIDE_I][0]) && !is_square_attacked(CASTLING_SQUARES[turn][QUEENSIDE_I][1]) && !is_square_attacked(CASTLING_SQUARES[turn][KINGSIDE_I][2])) {
-        move_list.push_back(Moves(CASTLING_SQUARES[turn][QUEENSIDE_I][0], CASTLING_SQUARES[turn][QUEENSIDE_I][2], -1, 1));
+        move_list.push_back(Moves(CASTLING_SQUARES[turn][QUEENSIDE_I][0], CASTLING_SQUARES[turn][QUEENSIDE_I][2], KING_I, QS_F));
       }
     }
   }
@@ -85,79 +88,79 @@ vector<Moves> Board::generate_piece_quiets(){
   
   //single pawn push
   while (attack_board) {
-    to_square = pop_lsb(&attack_board);
+    to_square = Attacks::pop_lsb(&attack_board);
     from_square = to_square + pawn_shift;
     //promotion
     if ((to_square >= 56) || (to_square <= 7)) {
-      move_list.push_back(Moves(from_square, to_square, -1, 3, QUEEN_I));
-      move_list.push_back(Moves(from_square, to_square, -1, 3, ROOK_I));
-      move_list.push_back(Moves(from_square, to_square, -1, 3, KNIGHT_I));
-      move_list.push_back(Moves(from_square, to_square, -1, 3, BISHOP_I));
+      move_list.push_back(Moves(from_square, to_square, PAWN_I, PROMOTE_F, QUEEN_I));
+      move_list.push_back(Moves(from_square, to_square, PAWN_I, PROMOTE_F, ROOK_I));
+      move_list.push_back(Moves(from_square, to_square, PAWN_I, PROMOTE_F, KNIGHT_I));
+      move_list.push_back(Moves(from_square, to_square, PAWN_I, PROMOTE_F, BISHOP_I));
     }
     else {
-      move_list.push_back(Moves(from_square, to_square));
+      move_list.push_back(Moves(from_square, to_square, PAWN_I));
     }
   }
   //double pawn push 
   while (double_attack_board) {
-    to_square = pop_lsb(&double_attack_board);
+    to_square = Attacks::pop_lsb(&double_attack_board);
     from_square = to_square + (pawn_shift << 1);
-    move_list.push_back(Moves(from_square, to_square));
+    move_list.push_back(Moves(from_square, to_square, PAWN_I, DOUBLE_PAWN_F));
   }
 
   //knight moves 
   piece_board = piece_boards[turn][KNIGHT_I];
   while(piece_board) {
-    from_square = pop_lsb(&piece_board);
+    from_square = Attacks::pop_lsb(&piece_board);
     attack_board = Attacks::KNIGHT_ATTACKS[from_square];
     BITMASK_CLEAR(attack_board, blockers);
     while (attack_board) {
-      to_square = pop_lsb(&attack_board);
-      move_list.push_back(Moves(from_square, to_square));
+      to_square = Attacks::pop_lsb(&attack_board);
+      move_list.push_back(Moves(from_square, to_square, KNIGHT_I));
     }
   }
   //bishop moves
   piece_board = piece_boards[turn][BISHOP_I];
   while(piece_board) {
-    from_square = pop_lsb(&piece_board);
+    from_square = Attacks::pop_lsb(&piece_board);
     attack_board = Attacks::get_diag_attacks(from_square, blockers);
     BITMASK_CLEAR(attack_board, blockers);
     while (attack_board) {
-      to_square = pop_lsb(&attack_board);
-      move_list.push_back(Moves(from_square, to_square));
+      to_square = Attacks::pop_lsb(&attack_board);
+      move_list.push_back(Moves(from_square, to_square, BISHOP_I));
     }
   }
   //rook moves
   piece_board = piece_boards[turn][ROOK_I];
   while(piece_board) {
-    from_square = pop_lsb(&piece_board);
+    from_square = Attacks::pop_lsb(&piece_board);
     attack_board = Attacks::get_line_attacks(from_square, blockers);
     BITMASK_CLEAR(attack_board, blockers);
     while (attack_board) {
-      to_square = pop_lsb(&attack_board);
-      move_list.push_back(Moves(from_square, to_square));
+      to_square = Attacks::pop_lsb(&attack_board);
+      move_list.push_back(Moves(from_square, to_square, ROOK_I));
     }
   }
   //queen moves
   piece_board = piece_boards[turn][QUEEN_I];
   while(piece_board) {
-    from_square = pop_lsb(&piece_board);
+    from_square = Attacks::pop_lsb(&piece_board);
     attack_board = Attacks::get_queen_attacks(from_square, blockers);
     BITMASK_CLEAR(attack_board, blockers);
     while (attack_board) {
-      to_square = pop_lsb(&attack_board);
-      move_list.push_back(Moves(from_square, to_square));
+      to_square = Attacks::pop_lsb(&attack_board);
+      move_list.push_back(Moves(from_square, to_square, QUEEN_I));
     }
   }
   //king moves 
   piece_board = piece_boards[turn][KING_I];
   while(piece_board) {
-    from_square = pop_lsb(&piece_board);
+    from_square = Attacks::pop_lsb(&piece_board);
     attack_board = Attacks::KING_ATTACKS[from_square];
     BITMASK_CLEAR(attack_board, blockers);
     while (attack_board) {
-      to_square = pop_lsb(&attack_board);
-      move_list.push_back(Moves(from_square, to_square));
+      to_square = Attacks::pop_lsb(&attack_board);
+      move_list.push_back(Moves(from_square, to_square, KING_I));
     }
   }
   return move_list;
@@ -174,84 +177,84 @@ vector<Moves> Board::generate_piece_captures(){
   //pawn captures 
   piece_board = piece_boards[turn][PAWN_I];
   while(piece_board) {
-    from_square = pop_lsb(&piece_board);
+    from_square = Attacks::pop_lsb(&piece_board);
     attack_board = Attacks::PAWN_ATTACKS[turn][from_square];
     BITMASK_INTERSECT(attack_board, blockers);
     while (attack_board) {
-      to_square = pop_lsb(&attack_board);
+      to_square = Attacks::pop_lsb(&attack_board);
       //promotion
       if ((to_square >= 56) || (to_square <= 7)) {
-        move_list.push_back(Moves(from_square, to_square, 0, 3, QUEEN_I));
-        move_list.push_back(Moves(from_square, to_square, 0, 3, ROOK_I));
-        move_list.push_back(Moves(from_square, to_square, 0, 3, KNIGHT_I));
-        move_list.push_back(Moves(from_square, to_square, 0, 3, BISHOP_I));
+        move_list.push_back(Moves(from_square, to_square, PAWN_I, PROMOTE_CAP_F, QUEEN_I));
+        move_list.push_back(Moves(from_square, to_square, PAWN_I, PROMOTE_CAP_F, ROOK_I));
+        move_list.push_back(Moves(from_square, to_square, PAWN_I, PROMOTE_CAP_F, KNIGHT_I));
+        move_list.push_back(Moves(from_square, to_square, PAWN_I, PROMOTE_CAP_F, BISHOP_I));
       }
       else {
-        move_list.push_back(Moves(from_square, to_square));
+        move_list.push_back(Moves(from_square, to_square, PAWN_I, CAPTURE_F));
       }
     }
     //en passant!
     if (ep_square != NO_SQ) {
-      attack_board = Attacks::PAWN_ATTACKS[turn][from_square] & (1ULL << ep_square);
+      attack_board = Attacks::PAWN_ATTACKS[turn][from_square] & SQUARES_BB[ep_square];
       if (attack_board) {
-        int to_square = get_lsb(attack_board);
-        move_list.push_back(Moves(from_square, to_square, -1, 2));
+        int to_square = Attacks::get_lsb(attack_board);
+        move_list.push_back(Moves(from_square, to_square, PAWN_I, EN_PASSANT_F));
       }
     }
   }
   //knight captures 
   piece_board = piece_boards[turn][KNIGHT_I];
   while(piece_board) {
-    from_square = pop_lsb(&piece_board);
+    from_square = Attacks::pop_lsb(&piece_board);
     attack_board = Attacks::KNIGHT_ATTACKS[from_square];
     BITMASK_INTERSECT(attack_board, blockers);
     while (attack_board) {
-      to_square = pop_lsb(&attack_board);
-      move_list.push_back(Moves(from_square, to_square));
+      to_square = Attacks::pop_lsb(&attack_board);
+      move_list.push_back(Moves(from_square, to_square, KNIGHT_I, CAPTURE_F));
     }
   }
   //bishop captures
   piece_board = piece_boards[turn][BISHOP_I];
   while(piece_board) {
-    from_square = pop_lsb(&piece_board);
+    from_square = Attacks::pop_lsb(&piece_board);
     attack_board = Attacks::get_diag_attacks(from_square, both_blockers);
     BITMASK_INTERSECT(attack_board, blockers);
     while (attack_board) {
-      to_square = pop_lsb(&attack_board);
-      move_list.push_back(Moves(from_square, to_square));
+      to_square = Attacks::pop_lsb(&attack_board);
+      move_list.push_back(Moves(from_square, to_square, BISHOP_I, CAPTURE_F));
     }
   }
   //rook captures
   piece_board = piece_boards[turn][ROOK_I];
   while(piece_board) {
-    from_square = pop_lsb(&piece_board);
+    from_square = Attacks::pop_lsb(&piece_board);
     attack_board = Attacks::get_line_attacks(from_square, both_blockers);
     BITMASK_INTERSECT(attack_board, blockers);
     while (attack_board) {
-      to_square = pop_lsb(&attack_board);
-      move_list.push_back(Moves(from_square, to_square));
+      to_square = Attacks::pop_lsb(&attack_board);
+      move_list.push_back(Moves(from_square, to_square, ROOK_I, CAPTURE_F));
     }
   }
   //queen captures
   piece_board = piece_boards[turn][QUEEN_I];
   while(piece_board) {
-    from_square = pop_lsb(&piece_board);
+    from_square = Attacks::pop_lsb(&piece_board);
     attack_board = Attacks::get_queen_attacks(from_square, both_blockers);
     BITMASK_INTERSECT(attack_board, blockers);
     while (attack_board) {
-      to_square = pop_lsb(&attack_board);
-      move_list.push_back(Moves(from_square, to_square));
+      to_square = Attacks::pop_lsb(&attack_board);
+      move_list.push_back(Moves(from_square, to_square, QUEEN_I, CAPTURE_F));
     }
   }
   //king captures 
   piece_board = piece_boards[turn][KING_I];
   while(piece_board) {
-    from_square = pop_lsb(&piece_board);
+    from_square = Attacks::pop_lsb(&piece_board);
     attack_board = Attacks::KING_ATTACKS[from_square];
     BITMASK_INTERSECT(attack_board, blockers);
     while (attack_board) {
-      to_square = pop_lsb(&attack_board);
-      move_list.push_back(Moves(from_square, to_square));
+      to_square = Attacks::pop_lsb(&attack_board);
+      move_list.push_back(Moves(from_square, to_square, KING_I, CAPTURE_F));
     }
   }
   return move_list;

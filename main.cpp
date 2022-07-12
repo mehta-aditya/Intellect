@@ -15,6 +15,13 @@ int main(){
   for(auto move : moves){
     cout << to_uci(move) << endl;
   }
+  board.render();
+  int x;
+  cin >> x;
+  board.push(moves[x]);
+  board.render();
+  board.pop();
+  board.render();
 
   return 0;
 }
