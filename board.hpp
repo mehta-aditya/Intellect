@@ -21,8 +21,8 @@ using U64 = uint64_t;
 #define BITMASK_INTERSECT(board, mask) ((board) &= (mask))
 #define BITMASK_FLIP(board, mask) ((board) ^= (mask))
 
-#ifndef Board_HPP
-#define Board_HPP
+#ifndef BOARD_HPP
+#define BOARD_HPP
 
 enum I {
   PAWN_I = 0, KNIGHT_I = 1, BISHOP_I = 2, ROOK_I = 3, QUEEN_I = 4, KING_I = 5, 
@@ -86,6 +86,19 @@ struct Position{
   }
 };
 
+//Gets index of least lsb
+inline int get_lsb(U64 bb) {
+    int i = __builtin_ctzll(bb);
+    return i;
+}
+
+//Gets index of least lsb and turns it to 0
+inline int pop_lsb(U64* bb) {
+    int i = __builtin_ctzll(*bb);
+    *bb &= *bb - 1;
+    return i;
+}
+
 //The chess board
 class Board {
   public:
@@ -99,13 +112,12 @@ class Board {
     //board.cpp
     void set_fen(string fen_set);
     void render();
-
     //movegen.cpp
     bool is_square_attacked(int move);
-    vector<Moves> generate_castling_moves();
-    vector<Moves> generate_piece_quiets();
-    vector<Moves> generate_piece_captures();
-    vector<Moves> generate_legal_moves();
+    vector<Moves> generate_castling_moves(vector<Moves>& move_list);
+    vector<Moves> generate_piece_quiets(vector<Moves>& move_list);
+    vector<Moves> generate_piece_captures(vector<Moves>& move_list);
+    vector<Moves> generate_psuedolegal_moves();
 
     //move.cpp
     inline int piece_at(int square, int color);
@@ -114,13 +126,13 @@ class Board {
     inline void move_piece(int from, int to, int color, int type);
     void push(Moves move);
     void pop();
-
-    
+    bool in_check() {
+      return is_square_attacked(get_lsb(piece_boards[turn][KING_I]));
+    }    
 };
-                   
+                    
 //Renders a bitboard (a tool)
 void bb_rendering(U64 bitboard);
-
 
 //Turns a move into a uci string
 inline string to_uci(Moves &move) {
@@ -130,5 +142,4 @@ inline string to_uci(Moves &move) {
   }
   return uci_str;
 }
-
 #endif

@@ -48,18 +48,6 @@ inline int count_bits(U64 bitboard) {
   }
   return count;
 }
-//Gets index of least lsb
-inline int get_lsb(U64 bb) {
-    int i = __builtin_ctzll(bb);
-    return i;
-}
-
-//Gets index of least lsb and turns it to 0
-inline int pop_lsb(U64* bb) {
-    int i = __builtin_ctzll(*bb);
-    *bb &= *bb - 1;
-    return i;
-}
 
 //Initilize the magics
 //(Using magics from https://github.com/maksimKorzh/chess_programming)

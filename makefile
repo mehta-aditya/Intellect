@@ -1,5 +1,5 @@
-output: main.o board.o attacks.o movegen.o move.o
-	g++ main.o board.o attacks.o movegen.o move.o -o output
+output: main.o board.o attacks.o movegen.o move.o engine.o eval.o
+	g++ main.o board.o attacks.o movegen.o move.o engine.o eval.o -o output
 main.o: main.cpp
 	g++ -c main.cpp
 board.o: board.cpp board.hpp
@@ -10,6 +10,10 @@ movegen.o: movegen.cpp
 	g++ -c movegen.cpp
 move.o: move.cpp
 	g++ -c move.cpp
+engine.o: engine.cpp engine.hpp
+	g++ -c engine.cpp
+eval.o: eval.cpp eval.hpp
+	g++ -c eval.cpp
 
 clean:
 	rm *.o output
