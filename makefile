@@ -1,5 +1,7 @@
+
+
 output: main.o board.o attacks.o movegen.o move.o engine.o eval.o
-	g++ main.o board.o attacks.o movegen.o move.o engine.o eval.o -o output
+	g++ -Wall -Wextra -Werror -ggdb -O0 -g main.o board.o attacks.o movegen.o move.o engine.o eval.o -o output
 main.o: main.cpp
 	g++ -c main.cpp
 board.o: board.cpp board.hpp

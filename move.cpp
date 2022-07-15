@@ -1,10 +1,9 @@
 #include "board.hpp"
 //Gets the piece at a square from the bitboards
 inline int Board::piece_at(int square, int color){
-    int square_bb = SQUARES_BB[square];
-    for (int i = PAWN_I; i <= KING_I; i++){
-        if (square_bb & piece_boards[color][i]) {
-            return i;
+    for (int p = PAWN_I; p <= KING_I; p++){
+        if (SQUARES_BB[square] & piece_boards[color][p]) {
+            return p;
         }
     }
     return NO_PIECE;
@@ -42,7 +41,7 @@ void Board::push(Moves move){
     //Capture flag
     else if (move.flag == CAPTURE_F) {
         move.captured = piece_at(move.to_square, opp_col);
-        remove_piece(move.from_square, opp_col, move.captured);
+        remove_piece(move.to_square, opp_col, move.captured);
         move_piece(move.from_square, move.to_square, turn, move.piece);
     }
     //Kingside Castle flag
@@ -120,6 +119,7 @@ void Board::push(Moves move){
 void Board::pop(){
     int opp_col = turn ^ 1;
     Position pos = position_history.top();
+    position_history.pop();
     //switch castling rights
     castling_rights[WHITE][KINGSIDE_I] = pos.castling_rights[WHITE][KINGSIDE_I];
     castling_rights[WHITE][QUEENSIDE_I] = pos.castling_rights[WHITE][QUEENSIDE_I];

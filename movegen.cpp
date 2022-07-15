@@ -38,7 +38,7 @@ bool Board::is_square_attacked(int square) {
   return false;
 }
 
-vector<Moves> Board::generate_castling_moves(vector<Moves>& move_list){
+void Board::generate_castling_moves(vector<Moves>& move_list){
   //If the turn is white
   if (castling_rights[turn][KINGSIDE_I] == true) {
     //Check if pieces in between are clear and castling is allowed
@@ -56,9 +56,8 @@ vector<Moves> Board::generate_castling_moves(vector<Moves>& move_list){
       }
     }
   }
-  return move_list;
 }
-vector<Moves> Board::generate_piece_quiets(vector<Moves>& move_list){
+void Board::generate_piece_quiets(vector<Moves>& move_list){
   int from_square, to_square;
   int pawn_shift;
   U64 piece_board, attack_board, double_attack_board;
@@ -72,7 +71,7 @@ vector<Moves> Board::generate_piece_quiets(vector<Moves>& move_list){
     attack_board = piece_board >> 8;
     BITMASK_CLEAR(attack_board, blockers);
     double_attack_board = attack_board >> 8;
-    BITMASK_INTERSECT(double_attack_board, RANK_5);
+    BITMASK_INTERSECT(double_attack_board, RANK_4);
     BITMASK_CLEAR(double_attack_board, blockers);
   }
   else {
@@ -160,14 +159,13 @@ vector<Moves> Board::generate_piece_quiets(vector<Moves>& move_list){
       move_list.push_back(Moves(from_square, to_square, KING_I));
     }
   }
-  return move_list;
 }
-vector<Moves> Board::generate_piece_captures(vector<Moves>& move_list){
+void Board::generate_piece_captures(vector<Moves>& move_list){
   int from_square, to_square;
-
+  int opp_col = turn ^ 1;
   U64 piece_board, attack_board;
-  U64 both_blockers = piece_co[turn] | piece_co[(turn^1)];
-  U64 blockers = piece_co[(turn^1)];
+  U64 both_blockers = piece_co[turn] | piece_co[opp_col];
+  U64 blockers = piece_co[opp_col];
   
   //pawn captures 
   piece_board = piece_boards[turn][PAWN_I];
@@ -252,14 +250,14 @@ vector<Moves> Board::generate_piece_captures(vector<Moves>& move_list){
       move_list.push_back(Moves(from_square, to_square, KING_I, CAPTURE_F));
     }
   }
-  return move_list;
 }
 
 vector<Moves> Board::generate_psuedolegal_moves(){
   vector<Moves> move_list;
   move_list.reserve(MOVE_LIST_RESERVE);
-  generate_castling_moves(move_list);
   generate_piece_captures(move_list);
+  generate_castling_moves(move_list);
+  
   generate_piece_quiets(move_list);
   return move_list;
 }

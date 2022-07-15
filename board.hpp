@@ -114,9 +114,9 @@ class Board {
     void render();
     //movegen.cpp
     bool is_square_attacked(int move);
-    vector<Moves> generate_castling_moves(vector<Moves>& move_list);
-    vector<Moves> generate_piece_quiets(vector<Moves>& move_list);
-    vector<Moves> generate_piece_captures(vector<Moves>& move_list);
+    void generate_castling_moves(vector<Moves>& move_list);
+    void generate_piece_quiets(vector<Moves>& move_list);
+    void generate_piece_captures(vector<Moves>& move_list);
     vector<Moves> generate_psuedolegal_moves();
 
     //move.cpp

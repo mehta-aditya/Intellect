@@ -9,7 +9,7 @@ int Engine::evaluation(Board &board){
             piece_board = board.piece_boards[c][p];
             while (piece_board) {
                 square = pop_lsb(&piece_board);
-                if (board.turn == WHITE) {
+                if (c == WHITE) {
                     //material value
                     value += PIECE_VALUES[p];
                     //positional value
