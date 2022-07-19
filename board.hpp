@@ -54,6 +54,7 @@ const string UNICODE_PIECES[2][6] = {{"♙", "♘", "♗", "♖", "♕", "♔"},
 //Structure for a move
 struct Moves {
   int from_square = NO_SQ, to_square = NO_SQ, flag = NO_FLAG, promoted = NO_PIECE, piece = NO_PIECE;
+  int order; //used for move ordering
   int captured = NO_PIECE; //captured piece
   Moves(int from = NO_SQ, int to = NO_SQ, int p = NO_PIECE, int f = NO_FLAG, int pro = PAWN_I) {
     from_square = from;
@@ -99,6 +100,9 @@ inline int pop_lsb(U64* bb) {
     return i;
 }
 
+//Renders a bitboard (a tool)
+void bb_rendering(U64 bitboard);
+
 //The chess board
 class Board {
   public:
@@ -113,7 +117,7 @@ class Board {
     void set_fen(string fen_set);
     void render();
     //movegen.cpp
-    bool is_square_attacked(int move);
+    bool is_square_attacked(int move, int color);
     void generate_castling_moves(vector<Moves>& move_list);
     void generate_piece_quiets(vector<Moves>& move_list);
     void generate_piece_captures(vector<Moves>& move_list);
@@ -126,13 +130,14 @@ class Board {
     inline void move_piece(int from, int to, int color, int type);
     void push(Moves move);
     void pop();
-    bool in_check() {
-      return is_square_attacked(get_lsb(piece_boards[turn][KING_I]));
+    bool in_check(int color) { 
+      int square = get_lsb(piece_boards[color][KING_I]);
+      if (square < 64) {return is_square_attacked(square, color);}
+      else {return true;}
     }    
 };
                     
-//Renders a bitboard (a tool)
-void bb_rendering(U64 bitboard);
+
 
 //Turns a move into a uci string
 inline string to_uci(Moves &move) {

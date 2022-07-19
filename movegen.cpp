@@ -5,10 +5,10 @@ const U64 CASTLING_BB[2][2] = {{(1ULL<<(64-3) | 1ULL<<(64-2)), (1ULL<<(64-7) | 1
       {(1ULL<<(3) | 1ULL<<(2)), (1ULL<<(7) | 1ULL<<(6) | 1ULL<<(5)) }};
 const U64 CASTLING_SQUARES[2][2][3] = {{{60, 61, 62}, {60, 59, 58}}, {{4, 5, 6}, {4, 3, 2}}};
 //Check if the square is attacked (useful for checking for checks checks)
-bool Board::is_square_attacked(int square) {
+bool Board::is_square_attacked(int square, int color) {
   U64 attack_board;
-  int opp_col = turn^1;
-  U64 both_blockers = piece_co[turn] | piece_co[opp_col];
+  int opp_col = color^1;
+  U64 both_blockers = piece_co[color] | piece_co[opp_col];
 
   //pawn attacks
   attack_board = Attacks::PAWN_ATTACKS[opp_col][square];
@@ -43,7 +43,7 @@ void Board::generate_castling_moves(vector<Moves>& move_list){
   if (castling_rights[turn][KINGSIDE_I] == true) {
     //Check if pieces in between are clear and castling is allowed
     if (!(CASTLING_BB[turn][KINGSIDE_I] & piece_co[turn])) {
-      if (!is_square_attacked(CASTLING_SQUARES[turn][KINGSIDE_I][0]) && !is_square_attacked(CASTLING_SQUARES[turn][KINGSIDE_I][1]) && !is_square_attacked(CASTLING_SQUARES[turn][KINGSIDE_I][2])) {
+      if (!is_square_attacked(CASTLING_SQUARES[turn][KINGSIDE_I][0], turn) && !is_square_attacked(CASTLING_SQUARES[turn][KINGSIDE_I][1], turn) && !is_square_attacked(CASTLING_SQUARES[turn][KINGSIDE_I][2], turn)) {
         move_list.push_back(Moves(CASTLING_SQUARES[turn][KINGSIDE_I][0], CASTLING_SQUARES[turn][KINGSIDE_I][2], KING_I, KS_F));
       }
     }
@@ -51,7 +51,7 @@ void Board::generate_castling_moves(vector<Moves>& move_list){
   if (castling_rights[turn][QUEENSIDE_I] == true) {
     //Check if pieces in between are clear and castling is allowed
     if (!(CASTLING_BB[turn][QUEENSIDE_I] & piece_co[turn])) {
-      if (!is_square_attacked(CASTLING_SQUARES[turn][QUEENSIDE_I][0]) && !is_square_attacked(CASTLING_SQUARES[turn][QUEENSIDE_I][1]) && !is_square_attacked(CASTLING_SQUARES[turn][KINGSIDE_I][2])) {
+      if (!is_square_attacked(CASTLING_SQUARES[turn][QUEENSIDE_I][0], turn) && !is_square_attacked(CASTLING_SQUARES[turn][QUEENSIDE_I][1], turn) && !is_square_attacked(CASTLING_SQUARES[turn][KINGSIDE_I][2], turn)) {
         move_list.push_back(Moves(CASTLING_SQUARES[turn][QUEENSIDE_I][0], CASTLING_SQUARES[turn][QUEENSIDE_I][2], KING_I, QS_F));
       }
     }

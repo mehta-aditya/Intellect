@@ -1,4 +1,5 @@
 #include "attacks.hpp"
+#include <cstring>
 U64 SQUARES_BB[64];
 U64 Attacks::FILES_BB[8], Attacks::RANKS_BB[8];
 
@@ -85,7 +86,7 @@ inline U64 Attacks::get_blockers(int index, int bits, U64 mask) {
   for (int i = 0; i < bits; i++) {
     int square = pop_lsb(&mask);
     if (index & (1 << i)) {
-      SET_BIT(blockers, square);
+      blockers |= SQUARES_BB[square];
     }
   }
   return blockers;
