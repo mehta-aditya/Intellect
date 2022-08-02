@@ -2,7 +2,7 @@
 
 inline void Engine::update_pv(Moves &move, int ply) {
     pv[ply][ply] = move; //update pv table
-
+    
     for (int next_ply = ply + 1; next_ply < pv_len[ply + 1]; next_ply++){
         // copy move from deeper ply into a current ply's line
         pv[ply][next_ply] = pv[ply + 1][next_ply];
@@ -14,19 +14,15 @@ inline void Engine::update_pv(Moves &move, int ply) {
 //check engine limits
 inline bool Engine::check_limits() {
     int elapsed_time = duration_cast<milliseconds>(steady_clock::now() - start_time).count();
-    if (stop == true) {return true;}
-    if (elapsed_time >= (time_for_move/2)) {return true;}
-    return false
+    if (elapsed_time >= (time_for_move/2)) {stop = true;}
+    return stop;
 }
 
 //quiesce search (run till position is stable)
 int Engine::quiesce(Board &board, int alpha, int beta, int depth = QUIESCE_MAX_DEPTH) {
     int capture_moves = 0;
     int value;
-    //check engine limits
-    int elapsed_time = duration_cast<milliseconds>(steady_clock::now() - start_time).count();
-    if (elapsed_time >= (time_for_move/2)) {return 0;}
-    if (stop == true) {return 0;}
+    if (check_limits()) {return 0;}
     if (depth == 0) {return evaluation(board);}
     //check eval
     int stand_pat = evaluation(board);
@@ -105,10 +101,7 @@ int Engine::negamax(Board &board, int alpha, int beta, int depth, int ply=0) {
         }
         board.pop(); //unmake move
        
-        //check engine limits
-        int elapsed_time = duration_cast<milliseconds>(steady_clock::now() - start_time).count();
-        if (elapsed_time >= (time_for_move/2)) {return 0;}
-        if (stop == true) {return 0;}
+        if (check_limits()) {return 0;}
 
         //alpha beta pruning
         if (value > alpha) {
@@ -139,16 +132,15 @@ int Engine::negamax(Board &board, int alpha, int beta, int depth, int ply=0) {
 }
 //iterative deepening loop
 void Engine::iterative_deepening(Board& board) {
-
-    start_time = steady_clock::now();
-
+    Moves best_move; //holds best move from previous play
+    start_time = steady_clock::now();   
     for (int depth = 1; depth <= search_depth; depth++) {
-        //check engine limits
         int elapsed_time = duration_cast<milliseconds>(steady_clock::now() - start_time).count();
-        if (stop == true) {break;}
-        if (elapsed_time >= (time_for_move/2)) {break;}
+        //check engine limits
+        if (check_limits()) {break;}
         //calculate
         int score = negamax(board, -MAX, MAX, depth, 0);
+        if (check_limits()) {break;}
 
         //print uci info
         cout << "info";
@@ -158,12 +150,16 @@ void Engine::iterative_deepening(Board& board) {
         cout << " pv ";
 
         // loop over the moves within a PV line
+        best_move = pv[0][0];
         for (int count = 0; count < pv_len[0]; count++){
             // print PV move
             cout << to_uci(pv[0][count]) << "  ";
         }     
         cout << endl;  
     }
+    //bestmove for uci
+    if (stop == false) {cout << "bestmove " << to_uci(best_move) << endl;}
+    else {cout << "bestmove " << to_uci(best_move) << endl;}
 }
 
 void Engine::search(Board& board, EngineLimits &limits) {
@@ -187,5 +183,4 @@ void Engine::search(Board& board, EngineLimits &limits) {
         time_for_move = (limits.co_time[board.turn] + limits.co_time[board.turn]/divider)/divider + limits.co_inc[board.turn] - OVERHEAD_TIME;
     }
     iterative_deepening(board);
-    cout << "bestmove " << to_uci(pv[0][0]) << endl;
 }

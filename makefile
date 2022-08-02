@@ -1,7 +1,7 @@
 
 
-output: main.o board.o attacks.o movegen.o move.o engine.o eval.o sort.o uci.o
-	g++ -O0 -g main.o board.o attacks.o movegen.o move.o engine.o eval.o sort.o uci.o -o output
+intellect: main.o board.o attacks.o movegen.o move.o engine.o eval.o sort.o uci.o
+	g++ -O0 -g main.o board.o attacks.o movegen.o move.o engine.o eval.o sort.o uci.o -o intellect
 main.o: main.cpp
 	g++ -c -g main.cpp
 board.o: board.cpp board.hpp
@@ -24,4 +24,4 @@ uci.o: uci.cpp uci.hpp
 
 clean:
 	del *.o 
-	del output.exe
+	del intellect.exe
