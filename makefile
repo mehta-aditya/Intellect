@@ -1,7 +1,7 @@
 
 
-output: main.o board.o attacks.o movegen.o move.o engine.o eval.o sort.o
-	g++ -O0 -g main.o board.o attacks.o movegen.o move.o engine.o eval.o sort.o -o output
+output: main.o board.o attacks.o movegen.o move.o engine.o eval.o sort.o uci.o
+	g++ -O0 -g main.o board.o attacks.o movegen.o move.o engine.o eval.o sort.o uci.o -o output
 main.o: main.cpp
 	g++ -c -g main.cpp
 board.o: board.cpp board.hpp
@@ -18,7 +18,10 @@ eval.o: eval.cpp eval.hpp
 	g++ -c -g eval.cpp
 sort.o: sort.cpp 
 	g++ -c -g sort.cpp
+uci.o: uci.cpp uci.hpp
+	g++ -c -g uci.cpp
 
 
 clean:
-	rm *.o output
+	del *.o 
+	del output

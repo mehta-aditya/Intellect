@@ -5,6 +5,8 @@
 #include <string>
 #include <sstream>
 #include <chrono>
+#include <cstring>
+#include <algorithm>
 
 using namespace std;
 using namespace std::chrono;
@@ -51,6 +53,8 @@ const string SQUARES[64] = {"a8", "b8", "c8","d8","e8","f8","g8","h8",
                       "a1", "b1", "c1","d1","e1","f1","g1","h1"};
 
 const string UNICODE_PIECES[2][6] = {{"♙", "♘", "♗", "♖", "♕", "♔"}, {"♟", "♞", "♝", "♜", "♛", "♚"}};
+const int MOVE_LIST_RESERVE = 218;
+
 //Structure for a move
 struct Moves {
   int from_square = NO_SQ, to_square = NO_SQ, flag = NO_FLAG, promoted = NO_PIECE, piece = NO_PIECE;
@@ -116,6 +120,8 @@ class Board {
     //board.cpp
     void set_fen(string fen_set);
     void render();
+    void reset();
+
     //movegen.cpp
     bool is_square_attacked(int move, int color);
     void generate_castling_moves(vector<Moves>& move_list);
@@ -143,7 +149,7 @@ class Board {
 inline string to_uci(Moves &move) {
   string uci_str = SQUARES[move.from_square] + SQUARES[move.to_square];
   if (move.promoted > PAWN_I) {
-    uci_str += "=" + FEN_PIECE_STRINGS[WHITE][move.promoted];
+    uci_str += "=" + FEN_PIECE_STRINGS[BLACK][move.promoted];
   }
   return uci_str;
 }

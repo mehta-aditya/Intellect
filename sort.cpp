@@ -31,4 +31,10 @@ void Engine::score_moves(vector<Moves> &moves){
     }
 }
 
+void Engine::score_quiesce_moves(vector<Moves> &moves) {
+    for (Moves &move : moves) {
+        if (move.flag == CAPTURE_F || move.flag == EN_PASSANT_F) {move.order = CAPTURE_O + MVV_LVA_TABLE[move.captured][move.piece];}
+        else if (move.flag == PROMOTE_CAP_F) {move.order = PROMOTION_O + PIECE_VALUES[move.promoted] + MVV_LVA_TABLE[move.captured][move.piece];}
+    }
+}
 

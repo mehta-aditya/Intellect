@@ -10,9 +10,52 @@ inline void Engine::update_pv(Moves &move, int ply) {
         // adjust PV length
     pv_len[ply] = pv_len[ply + 1];           
 }
-int Engine::search(Board &board, int alpha, int beta, int depth, int ply=0) {
-    int best_v, value;
+
+//quiesce search (run till position is stable)
+int Engine::quiesce(Board &board, int alpha, int beta, int depth = QUIESCE_MAX_DEPTH) {
+    int capture_moves = 0;
+    int value;
+    //check engine limits
+    int elapsed_time = duration_cast<milliseconds>(steady_clock::now() - start_time).count();
+    if (elapsed_time >= (time_for_move/2)) {return 0;}
+    if (stop == true) {return 0;}
+    if (depth == 0) {return evaluation(board);}
+    //check eval
+    int stand_pat = evaluation(board);
+    if (stand_pat >= beta) {return beta;}
+    if (alpha < stand_pat) {alpha = stand_pat;}
+
+    //iterate through moves
+    vector<Moves> moves;
+    moves.reserve(MOVE_LIST_RESERVE);
+    board.generate_piece_captures(moves);
+    score_quiesce_moves(moves);
+    sort(moves.begin(), moves.end(), move_sort());
+    //run through capture moves
+    for (Moves &move : moves) {
+        board.push(move); // play move
+        //check move legality; if it isn't legal skip the move
+        if(board.in_check(board.turn^1)) {
+            board.pop();
+            continue;
+        }
+        capture_moves++;
+        value = -quiesce(board, -beta, -alpha, depth-1);
+        board.pop();
+        //alpha beta pruning
+        if (value >= beta) {return beta;}
+        if (value > alpha) {alpha = value;}
+    }
+    if (capture_moves == 0) {return stand_pat;}
+    return alpha;
+}
+
+//run a negamax (PVS) search
+int Engine::negamax(Board &board, int alpha, int beta, int depth, int ply=0) {
+    int value;
     int legal_moves = 0; // number of legal moves tested in this node
+    bool pvs = false; //if true do zero window search
+
     //Moves best_m;
     pv_len[ply] = ply;
 
@@ -20,7 +63,7 @@ int Engine::search(Board &board, int alpha, int beta, int depth, int ply=0) {
 
     //eval/quiesce
     if (depth <= 0) {
-        return evaluation(board);
+        return quiesce(board, alpha, beta);
     }
 
     //iterate through moves
@@ -29,7 +72,7 @@ int Engine::search(Board &board, int alpha, int beta, int depth, int ply=0) {
     sort(moves.begin(), moves.end(), move_sort());
     //move ordering
 
-    //search remaining moves
+    //search moves
     for (Moves &move : moves) {
         board.push(move); // play move
         //check move legality; if it isn't legal skip the move
@@ -38,43 +81,41 @@ int Engine::search(Board &board, int alpha, int beta, int depth, int ply=0) {
             continue;
         }
         
-        //search the first move in node using negamax
-        if (legal_moves == 0) {
-            legal_moves++;
-            best_v = -search(board, -beta, -alpha, depth-1, ply+1); //search
-            board.pop(); //unmake the move
-            //alpha beta pruning (fail-soft)
-            if (best_v > alpha) {
-                update_pv(move, ply);
-                if (best_v >= beta) {
-                    return best_v;
-                }
-                alpha = best_v;
-            }
+        //full window
+        if (!pvs) {
+            legal_moves++;      
+            value = -negamax(board, -beta, -alpha, depth-1, ply+1); //search         
         }
-        //pvs search (uses zero window searches)
+        //zero window
         else {
             legal_moves++;
-            value = -search(board, -alpha - 1, -alpha, depth-1, ply+1); //search 
+            value = -negamax(board, -alpha - 1, -alpha, depth-1, ply+1); //search 
             //search again using negamax (fail-soft)
             if (value > alpha && value < beta) {
-                value = -search(board, -beta, -alpha, depth-1, ply+1);
-                if (value > alpha) {alpha = value;}
+                value = -negamax(board, -beta, -alpha, depth-1, ply+1);
+            }   
+        }
+        board.pop(); //unmake move
+       
+        //check engine limits
+        int elapsed_time = duration_cast<milliseconds>(steady_clock::now() - start_time).count();
+        if (elapsed_time >= (time_for_move/2)) {return 0;}
+        if (stop == true) {return 0;}
+
+        //alpha beta pruning
+        if (value > alpha) {
+            update_pv(move, ply);
+            alpha = value;
+            pvs = true;
+        }
+
+        if(value >= beta) {
+            //update killer move heuristic
+            if (move.captured == NO_PIECE) {
+                killers[1] = killers[0];
+                killers[0] = move;
             }
-            board.pop(); //unmake move
-            //alpha beta pruning
-            if (value > best_v) {
-                update_pv(move, ply);
-                if(value >= beta) {
-                    //update killer move heuristic
-                    if (move.captured == NO_PIECE) {
-                        killers[1] = killers[0];
-                        killers[0] = move;
-                    }
-                    return value;
-                }
-                best_v = value;
-            }
+            return beta;
         }
     }
 
@@ -86,22 +127,57 @@ int Engine::search(Board &board, int alpha, int beta, int depth, int ply=0) {
         else {return DRAW_V;}
     }
     //update pv
-    return best_v;
+    return alpha;
+}
+//iterative deepening loop
+void Engine::iterative_deepening(Board& board) {
+
+    start_time = steady_clock::now();
+
+    for (int depth = 1; depth <= search_depth; depth++) {
+        int score = negamax(board, -MAX, MAX, depth, 0);
+        //check engine limits
+        int elapsed_time = duration_cast<milliseconds>(steady_clock::now() - start_time).count();
+        if (stop == true) {break;}
+
+        //print uci info
+        cout << "info";
+        cout << " score cp " << score;
+        cout << " depth " << depth;
+        cout << " time " << elapsed_time;
+        cout << " pv ";
+
+        // loop over the moves within a PV line
+        for (int count = 0; count < pv_len[0]; count++){
+            // print PV move
+            cout << to_uci(pv[0][count]) << "  ";
+        }     
+        cout << endl;  
+        if (elapsed_time >= (time_for_move/2)) {break;}
+    }
 }
 
-
-string Engine::root(Board &board, int depth){   
+void Engine::search(Board& board, EngineLimits &limits) {
+    memset(killers, 0, sizeof(killers));
     memset(pv, 0, sizeof(pv));
     memset(pv_len, 0, sizeof(pv_len));
-    memset(killers, 0, 2);
-
-    int value = search(board, -MAX, MAX, depth);
-    cout << value << endl;
-    // loop over the moves within a PV line
-    for (int count = 0; count < pv_len[0]; count++){
-        // print PV move
-        cout << to_uci(pv[0][count]) << "  ";
+    
+    
+    //infinite
+    search_depth = MAX_DEPTH;
+    time_for_move = MAX_TIME;
+    if (limits.depth != 0) {
+        search_depth = limits.depth;
     }
-    return to_uci(pv[0][0]);
-}
+    else if (limits.move_time != 0) {
+        time_for_move = limits.move_time;
+    }
+    else if (limits.co_time[board.turn] != 0) {
+        //there are no moves until next time control (ie. sudden death)
+        int divider;
+        limits.moves_to_go == 0 ? divider = TIME_DIVIDER : divider = limits.moves_to_go;
 
+        time_for_move = (limits.co_time[board.turn] + limits.co_time[board.turn]/divider)/divider + limits.co_inc[board.turn] - OVERHEAD_TIME;
+    }
+    iterative_deepening(board);
+}

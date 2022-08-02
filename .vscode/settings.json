@@ -1,0 +1,21 @@
+{
+    "makefile.extensionOutputFolder": "./.vscode",
+    "files.associations": {
+        "chrono": "cpp",
+        "utility": "cpp",
+        "xlocale": "cpp",
+        "xstring": "cpp",
+        "iosfwd": "cpp",
+        "algorithm": "cpp",
+        "iostream": "cpp",
+        "vector": "cpp",
+        "stack": "cpp",
+        "array": "cpp",
+        "deque": "cpp",
+        "format": "cpp",
+        "forward_list": "cpp",
+        "initializer_list": "cpp",
+        "xtree": "cpp",
+        "xutility": "cpp"
+    }
+}

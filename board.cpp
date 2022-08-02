@@ -118,6 +118,18 @@ void Board::render(){
   }
   cout << "  a b c d e f g h" << endl;
 }
+
+void Board::reset(){
+  //reset all board values
+  while (!position_history.empty() ){position_history.pop();}
+  turn = WHITE;
+  memset(castling_rights, true, sizeof(castling_rights[0][0]) * 2 * 2); 
+  memset(castling_rights, true, sizeof(castling_rights[0][0]) * 2 * 2); 
+  int ep_square = NO_SQ;
+  memset(piece_boards, EMPTY_BB, sizeof(piece_boards[0][0]) * 2 * 6); 
+  memset(piece_co, EMPTY_BB, sizeof(piece_co)); 
+}
+
 //Show given bitboard
 void bb_rendering(U64 bitboard) {
   cout << bitboard << endl;

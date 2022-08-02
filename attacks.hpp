@@ -49,7 +49,6 @@ inline int count_bits(U64 bitboard) {
 }
 
 //Initilize the magics
-//(Using magics from https://github.com/maksimKorzh/chess_programming)
 const U64 diag_magics[64] = {
   18018831494946945ULL,
   1134767471886336ULL,
