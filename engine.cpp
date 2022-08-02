@@ -11,6 +11,14 @@ inline void Engine::update_pv(Moves &move, int ply) {
     pv_len[ply] = pv_len[ply + 1];           
 }
 
+//check engine limits
+inline bool Engine::check_limits() {
+    int elapsed_time = duration_cast<milliseconds>(steady_clock::now() - start_time).count();
+    if (stop == true) {return true;}
+    if (elapsed_time >= (time_for_move/2)) {return true;}
+    return false
+}
+
 //quiesce search (run till position is stable)
 int Engine::quiesce(Board &board, int alpha, int beta, int depth = QUIESCE_MAX_DEPTH) {
     int capture_moves = 0;
@@ -115,7 +123,7 @@ int Engine::negamax(Board &board, int alpha, int beta, int depth, int ply=0) {
                 killers[1] = killers[0];
                 killers[0] = move;
             }
-            return beta;
+            return value;
         }
     }
 
@@ -135,10 +143,12 @@ void Engine::iterative_deepening(Board& board) {
     start_time = steady_clock::now();
 
     for (int depth = 1; depth <= search_depth; depth++) {
-        int score = negamax(board, -MAX, MAX, depth, 0);
         //check engine limits
         int elapsed_time = duration_cast<milliseconds>(steady_clock::now() - start_time).count();
         if (stop == true) {break;}
+        if (elapsed_time >= (time_for_move/2)) {break;}
+        //calculate
+        int score = negamax(board, -MAX, MAX, depth, 0);
 
         //print uci info
         cout << "info";
@@ -153,7 +163,6 @@ void Engine::iterative_deepening(Board& board) {
             cout << to_uci(pv[0][count]) << "  ";
         }     
         cout << endl;  
-        if (elapsed_time >= (time_for_move/2)) {break;}
     }
 }
 
@@ -161,8 +170,6 @@ void Engine::search(Board& board, EngineLimits &limits) {
     memset(killers, 0, sizeof(killers));
     memset(pv, 0, sizeof(pv));
     memset(pv_len, 0, sizeof(pv_len));
-    
-    
     //infinite
     search_depth = MAX_DEPTH;
     time_for_move = MAX_TIME;
@@ -173,11 +180,12 @@ void Engine::search(Board& board, EngineLimits &limits) {
         time_for_move = limits.move_time;
     }
     else if (limits.co_time[board.turn] != 0) {
-        //there are no moves until next time control (ie. sudden death)
+        //there are no moves until next time control (ie. sudden death): use TIME_DIVIDER
         int divider;
         limits.moves_to_go == 0 ? divider = TIME_DIVIDER : divider = limits.moves_to_go;
 
         time_for_move = (limits.co_time[board.turn] + limits.co_time[board.turn]/divider)/divider + limits.co_inc[board.turn] - OVERHEAD_TIME;
     }
     iterative_deepening(board);
+    cout << "bestmove " << to_uci(pv[0][0]) << endl;
 }

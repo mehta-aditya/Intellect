@@ -24,4 +24,4 @@ uci.o: uci.cpp uci.hpp
 
 clean:
 	del *.o 
-	del output
+	del output.exe

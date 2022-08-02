@@ -46,7 +46,7 @@ void UCI::set_position(istringstream &is) {
 }
 //go command
 void UCI::go(istringstream &is) {
-    EngineLimits limits;
+    EngineLimits limits = EngineLimits();
     string cin_part;
     while (is >> cin_part) {
         //only search these specific moves
@@ -76,7 +76,7 @@ void UCI::init() {
     string cin_line,cin_part;
     bool searching = false;
     
-    board.reset(); //needs to be PROGRAMMED
+    board.reset();
 
     while (getline(cin, cin_line)) {
         istringstream is(cin_line);

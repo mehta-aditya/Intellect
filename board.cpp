@@ -3,6 +3,8 @@
 
 //Set board position using the FEN (Forsyth–Edwards Notation)
 void Board::set_fen(string fen_set){
+  reset(); //reset the board
+
   //Split the fen into a vector
   vector<string> fen_list;
   stringstream ss(fen_set);

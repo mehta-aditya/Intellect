@@ -32,24 +32,22 @@ struct EngineLimits {
     int moves_to_go, depth, nodes, mate;
      //Constructor
     EngineLimits() {
-        ponder, infinite = false;
-        co_time[WHITE], co_time[BLACK], co_inc[WHITE], co_inc[BLACK] = 0;
+        ponder = false, infinite = false;
+        co_time[WHITE] = 0, co_time[BLACK] = 0, co_inc[WHITE] = 0, co_inc[BLACK] = 0;
         move_time = 0;
-        moves_to_go, depth, nodes, mate = 0;
+        moves_to_go = 0, depth = 0, nodes = 0, mate = 0;
     }  
 };
 
 
 class Engine{
     public: 
-       
-        
         bool stop = false;
         //used for triangular pv table
-        int pv_len[MAX_DEPTH];
-        Moves pv[MAX_DEPTH][MAX_DEPTH];
+        int pv_len[MAX_DEPTH+1];
+        Moves pv[MAX_DEPTH+1][MAX_DEPTH+1];
         //used for killer heuristic
-        Moves killers[2] = {Moves()};
+        Moves killers[2] = {};
         
         //search parameters
         int search_depth;
@@ -58,6 +56,7 @@ class Engine{
 
          //engine.cpp
         inline void update_pv(Moves &move, int ply);
+        inline bool check_limits();
 
         int quiesce(Board &board, int alpha, int beta, int depth);
         int negamax(Board &board, int alpha, int beta, int depth, int ply);
@@ -73,11 +72,7 @@ class Engine{
         void score_quiesce_moves(vector<Moves> &moves);    
     
         void halt() {
-            // loop over the moves within a PV line
-            for (int count = 0; count < pv_len[0]; count++){
-                // print PV move
-                cout << to_uci(pv[0][count]) << "  ";
-            }
+            stop == true;
         }
 };
 
