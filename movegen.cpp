@@ -1,9 +1,6 @@
 #include "attacks.hpp"
 
-
-const U64 CASTLING_BB[2][2] = {{(1ULL<<(64-3) | 1ULL<<(64-2)), (1ULL<<(64-7) | 1ULL<<(64-6) | 1ULL<<(64-5)) }, 
-      {(1ULL<<(3) | 1ULL<<(2)), (1ULL<<(7) | 1ULL<<(6) | 1ULL<<(5)) }};
-const U64 CASTLING_SQUARES[2][2][3] = {{{60, 61, 62}, {60, 59, 58}}, {{4, 5, 6}, {4, 3, 2}}};
+const int CASTLING_SQUARES[2][2][3] = {{{60, 61, 62}, {60, 59, 58}}, {{4, 5, 6}, {4, 3, 2}}};
 //Check if the square is attacked (useful for checking for checks checks)
 bool Board::is_square_attacked(int square, int color) {
   U64 attack_board;

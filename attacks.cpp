@@ -1,6 +1,7 @@
 #include "attacks.hpp"
 #include <cstring>
 U64 SQUARES_BB[64];
+U64 CASTLING_BB[2][2];
 U64 Attacks::FILES_BB[8], Attacks::RANKS_BB[8];
 
 U64 Attacks::DIAG_MASKS[64];
@@ -27,6 +28,10 @@ void Attacks::init_bb_values() {
     FILES_BB[i] = 0x0101010101010101ULL << i;
     RANKS_BB[i] = 0xff << (8 * i);
   }
+  CASTLING_BB[WHITE][KINGSIDE_I] = (SQUARES_BB[61] | SQUARES_BB[62]);
+  CASTLING_BB[WHITE][QUEENSIDE_I] = (SQUARES_BB[59] | SQUARES_BB[58] | SQUARES_BB[57]);
+  CASTLING_BB[BLACK][KINGSIDE_I] = (SQUARES_BB[5] | SQUARES_BB[6]);
+  CASTLING_BB[BLACK][QUEENSIDE_I] = (SQUARES_BB[1] | SQUARES_BB[2] | SQUARES_BB[3]);
 }
 
 //Initialize stepper pieces (K, N, P) attacks

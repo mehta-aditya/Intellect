@@ -113,7 +113,7 @@ void Board::render(){
         cout << "." << " ";
       }
       else {
-        cout << UNICODE_PIECES[render_list[square].color][render_list[square].type] << " ";
+        cout << FEN_PIECE_STRINGS[render_list[square].color][render_list[square].type] << " ";
       }
     }
   cout << endl;

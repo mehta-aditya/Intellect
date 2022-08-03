@@ -38,6 +38,7 @@ enum FLAGS {
 };
 
 extern U64 SQUARES_BB[64];
+extern U64 CASTLING_BB[2][2];
 const U64 EMPTY_BB = 0ULL;
 const U64 ALL_BB = 0xFFFFFFFFFFFFFFFFULL;
 
@@ -52,7 +53,7 @@ const string SQUARES[64] = {"a8", "b8", "c8","d8","e8","f8","g8","h8",
                       "a2", "b2", "c2","d2","e2","f2","g2","h2",
                       "a1", "b1", "c1","d1","e1","f1","g1","h1"};
 
-const string UNICODE_PIECES[2][6] = {{"♙", "♘", "♗", "♖", "♕", "♔"}, {"♟", "♞", "♝", "♜", "♛", "♚"}};
+const string UNICODE_PIECES[2][6] = {{"\u2654", "\u2655", "\u2656", "\u2657", "\u2658", "\u2659"}, {"\u265A", "\u265B", "\u265C", "\u265D", "\u265E", "\u265F"}};
 const int MOVE_LIST_RESERVE = 218;
 
 //Structure for a move

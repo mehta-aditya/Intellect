@@ -4,6 +4,6 @@
 int main(){
   Attacks::init();
   UCI::init();
-
+  
   return 0;
 }
