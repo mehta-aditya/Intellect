@@ -5,6 +5,8 @@
 #include <string>
 #include <sstream>
 #include <chrono>
+#include <cstring>
+#include <algorithm>
 
 using namespace std;
 using namespace std::chrono;
@@ -36,6 +38,7 @@ enum FLAGS {
 };
 
 extern U64 SQUARES_BB[64];
+extern U64 CASTLING_BB[2][2];
 const U64 EMPTY_BB = 0ULL;
 const U64 ALL_BB = 0xFFFFFFFFFFFFFFFFULL;
 
@@ -50,7 +53,9 @@ const string SQUARES[64] = {"a8", "b8", "c8","d8","e8","f8","g8","h8",
                       "a2", "b2", "c2","d2","e2","f2","g2","h2",
                       "a1", "b1", "c1","d1","e1","f1","g1","h1"};
 
-const string UNICODE_PIECES[2][6] = {{"♙", "♘", "♗", "♖", "♕", "♔"}, {"♟", "♞", "♝", "♜", "♛", "♚"}};
+const string UNICODE_PIECES[2][6] = {{"\u2654", "\u2655", "\u2656", "\u2657", "\u2658", "\u2659"}, {"\u265A", "\u265B", "\u265C", "\u265D", "\u265E", "\u265F"}};
+const int MOVE_LIST_RESERVE = 218;
+
 //Structure for a move
 struct Moves {
   int from_square = NO_SQ, to_square = NO_SQ, flag = NO_FLAG, promoted = NO_PIECE, piece = NO_PIECE;
@@ -63,6 +68,14 @@ struct Moves {
     flag = f;
     promoted = pro;
   }
+  inline bool operator==(Moves other_move) {
+    if (other_move.from_square == from_square && 
+      other_move.to_square == to_square &&
+      other_move.captured == captured && 
+      other_move.promoted == promoted
+    ) {return true;}
+    return false;
+  }
 };
 //Structure for a piece
 struct Piece {
@@ -72,18 +85,24 @@ struct Piece {
     type = i;
   }
 };
+
 //Attributes for the position
 struct Position{
   Moves move;
   bool castling_rights[2][2];
   int ep_square;
-  Position(Moves m, bool cr[2][2], int ep) {
-    move = m;
+  U64 zobrist_hash; //only for null moves
+  Position(bool cr[2][2], int ep) {
     castling_rights[WHITE][KINGSIDE_I] = cr[WHITE][KINGSIDE_I];
     castling_rights[WHITE][QUEENSIDE_I] = cr[WHITE][QUEENSIDE_I];
     castling_rights[BLACK][KINGSIDE_I] = cr[BLACK][KINGSIDE_I];
     castling_rights[BLACK][QUEENSIDE_I] = cr[BLACK][QUEENSIDE_I];
     ep_square = ep;
+  }
+  //overload constructor to store ep square
+  Position(int ep, U64 hash) {
+    ep_square = ep;
+    zobrist_hash = hash;
   }
 };
 
@@ -107,17 +126,25 @@ void bb_rendering(U64 bitboard);
 class Board {
   public:
     stack<Position> position_history;
+    vector<U64> zobrist_history;
     int turn = WHITE;
     bool castling_rights[2][2]; //[color][types] .//[0:White or 1: Black][0:Kingside or 1:Queenside]
     int ep_square;
     //No Piece, WP, WN, WB, WR, WQ, WK, BP, BN, BB, BR, BQ, BK
     U64 piece_boards[2][6] = {EMPTY_BB};
     U64 piece_co[2] = {EMPTY_BB};
+    //key for zobrist hashing
+    U64 zobrist_hash = EMPTY_BB;
+
     //board.cpp
     void set_fen(string fen_set);
     void render();
+    void reset();
+    //constructor 
+    //Board() {zobrist_history.reserve(100);}
+
     //movegen.cpp
-    bool is_square_attacked(int move, int color);
+    bool is_square_attacked(int square, int color);
     void generate_castling_moves(vector<Moves>& move_list);
     void generate_piece_quiets(vector<Moves>& move_list);
     void generate_piece_captures(vector<Moves>& move_list);
@@ -130,11 +157,19 @@ class Board {
     inline void move_piece(int from, int to, int color, int type);
     void push(Moves move);
     void pop();
+    void push_null();
+    void pop_null();
     bool in_check(int color) { 
       int square = get_lsb(piece_boards[color][KING_I]);
       if (square < 64) {return is_square_attacked(square, color);}
       else {return true;}
     }    
+    bool is_repetition() {
+      if (count(zobrist_history.begin(), zobrist_history.end(), zobrist_hash) >= 2) {
+        return true;
+      } 
+      return false;
+    }
 };
                     
 
@@ -143,7 +178,7 @@ class Board {
 inline string to_uci(Moves &move) {
   string uci_str = SQUARES[move.from_square] + SQUARES[move.to_square];
   if (move.promoted > PAWN_I) {
-    uci_str += "=" + FEN_PIECE_STRINGS[WHITE][move.promoted];
+    uci_str += FEN_PIECE_STRINGS[BLACK][move.promoted];
   }
   return uci_str;
 }

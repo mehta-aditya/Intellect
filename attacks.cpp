@@ -1,6 +1,7 @@
 #include "attacks.hpp"
 #include <cstring>
 U64 SQUARES_BB[64];
+U64 CASTLING_BB[2][2];
 U64 Attacks::FILES_BB[8], Attacks::RANKS_BB[8];
 
 U64 Attacks::DIAG_MASKS[64];
@@ -25,8 +26,12 @@ void Attacks::init_bb_values() {
   //Initialize ranks and files in bb 
   for (int i = 0; i < 8; i++) {
     FILES_BB[i] = 0x0101010101010101ULL << i;
-    RANKS_BB[i] = 0xff << (8 * i);
+    RANKS_BB[i] = 0xffULL << (8 * i);
   }
+  CASTLING_BB[WHITE][KINGSIDE_I] = (SQUARES_BB[61] | SQUARES_BB[62]);
+  CASTLING_BB[WHITE][QUEENSIDE_I] = (SQUARES_BB[59] | SQUARES_BB[58] | SQUARES_BB[57]);
+  CASTLING_BB[BLACK][KINGSIDE_I] = (SQUARES_BB[5] | SQUARES_BB[6]);
+  CASTLING_BB[BLACK][QUEENSIDE_I] = (SQUARES_BB[1] | SQUARES_BB[2] | SQUARES_BB[3]);
 }
 
 //Initialize stepper pieces (K, N, P) attacks
@@ -46,8 +51,9 @@ void Attacks::init_diag_tables() {
     DIAG_MASKS[square] = sliding_attacks(square, EMPTY_BB, DIAG_DELTAS);
     BITMASK_CLEAR(DIAG_MASKS[square], EDGES);
     //Attack Table
-    U64 blocker_bits = count_bits(DIAG_MASKS[square]);
-    for (int i = 0; i < (1 << blocker_bits); i++) {
+    int blocker_bits = count_bits(DIAG_MASKS[square]);
+    int blocker_i = (1 << blocker_bits);
+    for (int i = 0; i < blocker_i; i++) {
       U64 blockers = get_blockers(i, blocker_bits, DIAG_MASKS[square]);
       int magic_index = (blockers * diag_magics[square]) >> (64 - diag_relevant_bits[square]);
       DIAG_ATTACKS[square][magic_index] = sliding_attacks(square, blockers, DIAG_DELTAS);
@@ -59,9 +65,8 @@ void Attacks::init_diag_tables() {
 void Attacks::init_line_tables() {
   for (int square = 0; square < 64; square++) {
     //Masks
-    U64 blocked_edges = get_edges(square);
     LINE_MASKS[square] = sliding_attacks(square, EMPTY_BB, LINE_DELTAS);
-    BITMASK_CLEAR(LINE_MASKS[square], blocked_edges);
+    BITMASK_CLEAR(LINE_MASKS[square], get_edges(square));
     BITMASK_CLEAR(LINE_MASKS[square], CORNERS);
     //Attack Table
     U64 blocker_bits = count_bits(LINE_MASKS[square]);
@@ -94,11 +99,10 @@ inline U64 Attacks::get_blockers(int index, int bits, U64 mask) {
 
 //Used to cut off edges of the board which are not needed in diag or line masks
 inline U64 Attacks::get_edges(int square)  {
-  int square_rank = RANKS_BB[(int)(square & 7)];
-  int square_file = FILES_BB[(int)(square >> 3)];
+  U64 square_rank = RANKS_BB[(int)(square/8)];
+  U64 square_file = FILES_BB[(square%8)];
   
-  return ((FILE_A & !square_file) | (FILE_H & !square_file) \
-    | (RANK_1 & !square_rank) | (RANK_8 & !square_rank));
+  return ((RANKS_BB[0] & ~square_rank) | (RANKS_BB[7] & ~square_rank) | (FILES_BB[0] & ~square_file) | (FILES_BB[7] & ~square_file));
 }
 
 //Checks which squares can be attacked. 

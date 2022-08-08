@@ -3,7 +3,7 @@
 #ifndef EVAL_HPP
 #define EVAL_HPP
 
-const int PIECE_VALUES[6] = {100, 320, 330, 500, 900, 10000};
+const int PIECE_VALUES[6] = {100, 320, 330, 500, 900, 20000};
 
 const int PST_VALUES[6][64] = {
     {0, 0, 0, 0, 0, 0, 0, 0, //PAWN
