@@ -55,26 +55,51 @@ int Engine::quiesce(Board &board, int alpha, int beta, int depth = QUIESCE_MAX_D
 }
 
 //run a negamax (PVS) search
-int Engine::negamax(Board &board, int alpha, int beta, int depth, int ply=0) {
+int Engine::negamax(Board &board, int alpha, int beta, int depth, int ply=0, bool null=true) {
     int value;
+    Moves best_m = Moves();
     int legal_moves = 0; // number of legal moves tested in this node
-    bool pvs = false; //if true do zero window search
+    int original_alpha = alpha;
+    int flag = TT_ALPHA;
+    bool is_pv = beta - alpha > 1; 
+    bool in_check = board.in_check(board.turn);
 
-    //Moves best_m;
     pv_len[ply] = ply;
 
-    //Check for draw (threefold repition and 50 move)
+    //*Check for draw (threefold repition and 50 move)
+    if (ply && board.is_repetition()) {return DRAW_V;}
 
+    //check transposition table: if it is not root, 
+    if(ply && !is_pv && tt_table.find(board.zobrist_hash) != tt_table.end() && tt_table[board.zobrist_hash].depth >= depth) {   
+        if(tt_table[board.zobrist_hash].flag == TT_EXACT) {return tt_table[board.zobrist_hash].value;}
+        else if (tt_table[board.zobrist_hash].flag == TT_ALPHA && tt_table[board.zobrist_hash].value <= alpha) {return alpha;}
+        else if (tt_table[board.zobrist_hash].flag == TT_BETA && tt_table[board.zobrist_hash].value >= beta) {return beta;}
+        best_m = tt_table[board.zobrist_hash].move;
+    }
+    
     //eval/quiesce
     if (depth <= 0) {
         return quiesce(board, alpha, beta);
     }
+    //count node
+    nodes++;
 
-    //iterate through moves
-    vector<Moves> moves = board.generate_psuedolegal_moves();
-    score_moves(moves);
-    sort(moves.begin(), moves.end(), move_sort());
+    //null move pruning
+    // *add methods to stop zugzwang 
+    int R;
+    depth > 6 ? R = 3 : R = 2;
+    if (depth >= 2 && !in_check && !is_pv) {
+        board.push_null();
+        value = -negamax(board, -beta, -beta+1, depth-R, ply+1, false);
+        board.pop_null();
+        //check for beta cutoff
+        if (value >= beta) {return beta;}
+    }
+
     //move ordering
+    vector<Moves> moves = board.generate_psuedolegal_moves();
+    score_moves(board, moves, best_m, ply);
+    sort(moves.begin(), moves.end(), move_sort());
 
     //search moves
     for (Moves &move : moves) {
@@ -84,49 +109,79 @@ int Engine::negamax(Board &board, int alpha, int beta, int depth, int ply=0) {
             board.pop();
             continue;
         }
-        
-        //full window
-        if (!pvs) {
-            legal_moves++;      
-            value = -negamax(board, -beta, -alpha, depth-1, ply+1); //search         
+        //if legal increase legal move count
+        legal_moves++;  
+        R = 0;
+        //use late move reduction (LMR)
+        if (depth >= 3 && legal_moves >= 2 && move.captured == NO_PIECE && move.promoted == PAWN_I && !in_check) {
+            R = 1;
         }
         //zero window
-        else {
-            legal_moves++;
-            value = -negamax(board, -alpha - 1, -alpha, depth-1, ply+1); //search 
-            //search again using negamax (fail-soft)
+        if (legal_moves > 1) {  
+            value = -negamax(board, -alpha-1, -alpha, depth-1-R, ply+1); //search with lmr
+            //search again if late move didn't fail low
+            if (R && value > alpha) {
+                value = -negamax(board, -alpha-1, -alpha, depth-1, ply+1);
+            }
+
+            //search again using a full window
             if (value > alpha && value < beta) {
                 value = -negamax(board, -beta, -alpha, depth-1, ply+1);
-            }   
+            }
+                     
+        }
+        //full window
+        else {
+            value = -negamax(board, -beta, -alpha, depth-1, ply+1); //search
         }
         board.pop(); //unmake move
-       
+
         if (check_limits()) {return 0;}
+
 
         //alpha beta pruning
         if (value > alpha) {
-            update_pv(move, ply);
             alpha = value;
-            pvs = true;
+            //update best move
+            best_m = move;
+            update_pv(move, ply);
+            //change other variables
+            flag = TT_EXACT;
+            //update history heuristic
+            if (move.captured == NO_PIECE) {
+                history[board.turn][move.from_square][move.to_square] += depth;
+            }
         }
-
+        //fail high
         if(value >= beta) {
+            //update tt table
+            if (tt_table.size() >= TT_MAX_SIZE) {
+                tt_table.erase(tt_table.begin());
+            }
+            tt_table[board.zobrist_hash] = TTEntry(value, best_m, depth, TT_BETA);
+
             //update killer move heuristic
             if (move.captured == NO_PIECE) {
                 killers[1] = killers[0];
                 killers[0] = move;
             }
-            return value;
+            return beta;
+        }
+        //check for stalemate and checkmate
+        if (legal_moves == 0) {
+            //-MATE because current player does not want to get checkmated + ply (so we look for fastest mate)
+            if(board.in_check(board.turn)) {return -MATE_V + ply;}
+            //STALEMATE
+            else {return DRAW_V;}
         }
     }
 
-    //Stalemate and checkmate
-    if (legal_moves == 0) {
-        //-MATE because current player does not want to get checkmated + ply (so we look for fastest mate)
-        if(board.in_check(board.turn)) {return -MATE_V + ply;}
-        //STALEMATE
-        else {return DRAW_V;}
+    //store transposition table values
+    if (tt_table.size() >= TT_MAX_SIZE) {
+        tt_table.erase(tt_table.begin());
     }
+    tt_table[board.zobrist_hash] = TTEntry(alpha, best_m, depth, flag);
+
     //update pv
     return alpha;
 }
@@ -134,19 +189,19 @@ int Engine::negamax(Board &board, int alpha, int beta, int depth, int ply=0) {
 void Engine::iterative_deepening(Board& board) {
     Moves best_move; //holds best move from previous play
     start_time = steady_clock::now();   
-    for (int depth = 1; depth <= search_depth; depth++) {
-        int elapsed_time = duration_cast<milliseconds>(steady_clock::now() - start_time).count();
+    for (int depth = 1; depth <= search_depth; depth++) {       
         //check engine limits
         if (check_limits()) {break;}
         //calculate
         int score = negamax(board, -MAX, MAX, depth, 0);
         if (check_limits()) {break;}
-
+        int elapsed_time = duration_cast<milliseconds>(steady_clock::now() - start_time).count();
         //print uci info
         cout << "info";
         cout << " score cp " << score;
         cout << " depth " << depth;
         cout << " time " << elapsed_time;
+        cout << " nodes " << nodes;
         cout << " pv ";
 
         // loop over the moves within a PV line
@@ -163,7 +218,11 @@ void Engine::iterative_deepening(Board& board) {
 }
 
 void Engine::search(Board& board, EngineLimits &limits) {
+    //reset important values
+    stop = false;
+    nodes = 0;
     memset(killers, 0, sizeof(killers));
+    memset(history, 0, sizeof(history));
     memset(pv, 0, sizeof(pv));
     memset(pv_len, 0, sizeof(pv_len));
     //infinite

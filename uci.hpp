@@ -12,10 +12,14 @@ namespace UCI {
     extern Engine engine;
     
     Moves to_move(string &uci_move); //FIX to_uci promotion
+    int perft(int depth);
+    void divide(int depth);
+
+
     void set_position(istringstream &is);
     void go(istringstream &is);
     void init();
-    
+
 }
 
 #endif

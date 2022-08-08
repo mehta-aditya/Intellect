@@ -68,6 +68,14 @@ struct Moves {
     flag = f;
     promoted = pro;
   }
+  inline bool operator==(Moves other_move) {
+    if (other_move.from_square == from_square && 
+      other_move.to_square == to_square &&
+      other_move.captured == captured && 
+      other_move.promoted == promoted
+    ) {return true;}
+    return false;
+  }
 };
 //Structure for a piece
 struct Piece {
@@ -77,18 +85,24 @@ struct Piece {
     type = i;
   }
 };
+
 //Attributes for the position
 struct Position{
   Moves move;
   bool castling_rights[2][2];
   int ep_square;
-  Position(Moves m, bool cr[2][2], int ep) {
-    move = m;
+  U64 zobrist_hash; //only for null moves
+  Position(bool cr[2][2], int ep) {
     castling_rights[WHITE][KINGSIDE_I] = cr[WHITE][KINGSIDE_I];
     castling_rights[WHITE][QUEENSIDE_I] = cr[WHITE][QUEENSIDE_I];
     castling_rights[BLACK][KINGSIDE_I] = cr[BLACK][KINGSIDE_I];
     castling_rights[BLACK][QUEENSIDE_I] = cr[BLACK][QUEENSIDE_I];
     ep_square = ep;
+  }
+  //overload constructor to store ep square
+  Position(int ep, U64 hash) {
+    ep_square = ep;
+    zobrist_hash = hash;
   }
 };
 
@@ -112,19 +126,25 @@ void bb_rendering(U64 bitboard);
 class Board {
   public:
     stack<Position> position_history;
+    vector<U64> zobrist_history;
     int turn = WHITE;
     bool castling_rights[2][2]; //[color][types] .//[0:White or 1: Black][0:Kingside or 1:Queenside]
     int ep_square;
     //No Piece, WP, WN, WB, WR, WQ, WK, BP, BN, BB, BR, BQ, BK
     U64 piece_boards[2][6] = {EMPTY_BB};
     U64 piece_co[2] = {EMPTY_BB};
+    //key for zobrist hashing
+    U64 zobrist_hash = EMPTY_BB;
+
     //board.cpp
     void set_fen(string fen_set);
     void render();
     void reset();
+    //constructor 
+    //Board() {zobrist_history.reserve(100);}
 
     //movegen.cpp
-    bool is_square_attacked(int move, int color);
+    bool is_square_attacked(int square, int color);
     void generate_castling_moves(vector<Moves>& move_list);
     void generate_piece_quiets(vector<Moves>& move_list);
     void generate_piece_captures(vector<Moves>& move_list);
@@ -137,11 +157,19 @@ class Board {
     inline void move_piece(int from, int to, int color, int type);
     void push(Moves move);
     void pop();
+    void push_null();
+    void pop_null();
     bool in_check(int color) { 
       int square = get_lsb(piece_boards[color][KING_I]);
       if (square < 64) {return is_square_attacked(square, color);}
       else {return true;}
     }    
+    bool is_repetition() {
+      if (count(zobrist_history.begin(), zobrist_history.end(), zobrist_hash) >= 2) {
+        return true;
+      } 
+      return false;
+    }
 };
                     
 
@@ -150,7 +178,7 @@ class Board {
 inline string to_uci(Moves &move) {
   string uci_str = SQUARES[move.from_square] + SQUARES[move.to_square];
   if (move.promoted > PAWN_I) {
-    uci_str += "=" + FEN_PIECE_STRINGS[BLACK][move.promoted];
+    uci_str += FEN_PIECE_STRINGS[BLACK][move.promoted];
   }
   return uci_str;
 }

@@ -1,5 +1,5 @@
 #include "board.hpp"
-
+#include "zobrist.hpp"
 
 //Set board position using the FEN (Forsyth–Edwards Notation)
 void Board::set_fen(string fen_set){
@@ -32,6 +32,7 @@ void Board::set_fen(string fen_set){
             for (int m = PAWN_I; m <= KING_I; m++) {
               if (fen_list[i][j] == FEN_PIECE_STRINGS[l][m][0]){
                 SET_BIT(piece_boards[l][m], iter);
+                zobrist_hash ^= PIECE_ZOBRIST[l][m][iter];
                 break;
               }
             }
@@ -47,7 +48,8 @@ void Board::set_fen(string fen_set){
       }
       else {
         turn = BLACK;
-      }
+        zobrist_hash ^= TURN_ZOBRIST; 
+      }   
     }
     //Castling rights fen
     else if (i == 2) {
@@ -57,15 +59,19 @@ void Board::set_fen(string fen_set){
       else {
         if (fen_list[i].find("K") != string::npos) {
           castling_rights[0][0] = true;
+          zobrist_hash ^= CASTLING_ZOBRIST[0][0];
         } else {castling_rights[0][0] = false;}
         if (fen_list[i].find("Q") != string::npos) {
           castling_rights[0][1] = true;
+          zobrist_hash ^= CASTLING_ZOBRIST[0][1];
         } else {castling_rights[0][1] = false;}
         if (fen_list[i].find("k") != string::npos) {
           castling_rights[1][0] = true;
+          zobrist_hash ^= CASTLING_ZOBRIST[1][0];
         } else {castling_rights[1][0] = false;}
         if (fen_list[i].find("q") != string::npos) {
           castling_rights[1][1] = true;
+          zobrist_hash ^= CASTLING_ZOBRIST[1][1];
         } else {castling_rights[1][1] = false;}
       }
     }
@@ -78,6 +84,7 @@ void Board::set_fen(string fen_set){
         for (int j = 0; j < 64; j++) {
           if (SQUARES[j] == fen_list[i]) {
             ep_square = j;
+            zobrist_hash ^= j % 8;
             break;
           }
         }
@@ -124,12 +131,14 @@ void Board::render(){
 void Board::reset(){
   //reset all board values
   while (!position_history.empty() ){position_history.pop();}
+  zobrist_history.clear();
   turn = WHITE;
   memset(castling_rights, true, sizeof(castling_rights[0][0]) * 2 * 2); 
   memset(castling_rights, true, sizeof(castling_rights[0][0]) * 2 * 2); 
-  int ep_square = NO_SQ;
+  ep_square = NO_SQ;
   memset(piece_boards, EMPTY_BB, sizeof(piece_boards[0][0]) * 2 * 6); 
   memset(piece_co, EMPTY_BB, sizeof(piece_co)); 
+  zobrist_hash = EMPTY_BB;
 }
 
 //Show given bitboard

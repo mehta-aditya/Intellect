@@ -5,7 +5,47 @@ namespace UCI {
     Engine engine;
 }
 
+int UCI::perft(int depth){ 
+  int nodes = 0;
 
+  if (depth == 0) {return 1;}
+
+  vector<Moves> moves = board.generate_psuedolegal_moves();
+  for (Moves &move : moves) {
+    board.push(move);
+    if (!board.in_check(board.turn^1)) {
+        nodes += perft(depth - 1);
+        // if (move.flag == CAPTURE_F || move.flag == PROMOTE_CAP_F) {captures++;}
+        // if (move.flag == KS_F || move.flag == QS_F) {castles++;}
+        // if (board.in_check(board.turn)) {checks++;}
+        // if (move.flag == PROMOTE_F || move.flag == PROMOTE_CAP_F) {promotions++;}
+    }
+    
+    board.pop();
+  }
+  return nodes;
+}
+
+void UCI::divide(int depth) {
+  int nodes = 0, n = 0;
+
+  if (depth == 0) {return;}
+
+  vector<Moves> moves = board.generate_psuedolegal_moves();
+  for (Moves &move : moves) {
+    board.push(move);
+    if (!board.in_check(board.turn^1)) {
+      n = perft(depth - 1);
+      cout << to_uci(move) << ":" << n << endl;
+      nodes += n;
+    }
+    board.pop();
+  }
+    cout << endl;
+    cout << "Nodes searched: " << nodes << endl << endl;
+}
+
+//change a uci string to a move
 Moves UCI::to_move(string &uci_move) {
     //only for promotions; make the promotion piece lowercase
     if (uci_move.length() == 5){
@@ -22,6 +62,7 @@ Moves UCI::to_move(string &uci_move) {
 
 //position command
 void UCI::set_position(istringstream &is) {
+    engine.tt_table.clear();
     string cin_part;
     is >> cin_part;
     //set to starting position
@@ -48,7 +89,10 @@ void UCI::set_position(istringstream &is) {
 void UCI::go(istringstream &is) {
     EngineLimits limits = EngineLimits();
     string cin_part;
+    int perft = 0;
     while (is >> cin_part) {
+        if (cin_part == "perft") {is >> perft; break;}
+
         //only search these specific moves
         if (cin_part == "searchmoves") {
             while (is >> cin_part) {
@@ -64,18 +108,23 @@ void UCI::go(istringstream &is) {
         else if (cin_part == "movetime") {is >> limits.move_time;}
         else if (cin_part == "infinite") {limits.infinite = true;}
     }    
+    if (!perft) {
+        //the engine should start thinking
+        engine.search(board, limits);
+    }
+    else {
+        divide(perft);
+    }
 
-    //the engine should start thinking
-    engine.search(board, limits);
 }
 
 //start uci engine
 void UCI::init() {
     //start off with the identifying info
-    cout << "Intellect" << ENGINE_VER << " by Aditya Mehta" << endl;
+    cout << "Intellect " << ENGINE_VER << " by Aditya Mehta" << endl;
     string cin_line,cin_part;
     bool searching = false;
-    
+    engine.tt_table.reserve(engine.TT_MAX_SIZE);
     board.reset();
 
     while (getline(cin, cin_line)) {
@@ -102,6 +151,7 @@ void UCI::init() {
             cout << "readyok" << endl;
         }
         else if (cin_part == "ucinewgame") {
+            engine.tt_table.clear();
             board.set_fen(STARTING_FEN);
         }
         else if (cin_part == "position") {
@@ -112,6 +162,11 @@ void UCI::init() {
             go(is);
             searching = false;
         }
+        //for debugging
+        else if (cin_part == "render") {
+            board.render();
+        }
+
         //setoption commands
     }
 }

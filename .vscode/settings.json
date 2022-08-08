@@ -18,6 +18,11 @@
         "xtree": "cpp",
         "xutility": "cpp",
         "string": "cpp",
-        "ostream": "cpp"
+        "ostream": "cpp",
+        "type_traits": "cpp",
+        "locale": "cpp",
+        "xhash": "cpp",
+        "list": "cpp",
+        "exception": "cpp"
     }
 }
