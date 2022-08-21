@@ -85,6 +85,29 @@ class Engine{
         int quiesce(Board &board, int alpha, int beta, int depth);
         int negamax(Board &board, int alpha, int beta, int depth, int ply, bool null);
         void iterative_deepening(Board& board);
+        //engine.cpp
+        //initialize engine table
+        Engine() {
+            TT_MAX_SIZE = set_tt_memory(tt_table, DEFUALT_TT_MB);
+            for (int d = 0; d < MAX_DEPTH; d++) {
+                for (int m = 0; m < 64; m++) {
+                    LMR_TABLE[d][m] = max(d/5, 2) + m/10;
+                }
+            }
+        }
+        //sort.cpp
+        void score_moves(Board &board, vector<Moves> &moves, Moves tt_move, int ply);
+        void score_quiesce_moves(vector<Moves> &moves, Moves tt_move);  
+        void order_moves(vector<Moves> &moves, int index);
+        bool see(Board &board, Moves move, int threshold);
+
+        //board.cpp
+        inline void update_pv(Moves &move, int ply);
+        inline bool check_limits();
+
+        inline int quiesce(Board &board, int alpha, int beta, int depth);
+        inline int negamax(Board &board, int alpha, int beta, int depth, int ply, bool null);
+        inline void iterative_deepening(Board& board);
         void search(Board& board, EngineLimits &limits);
         
         //eval.cpp
@@ -95,7 +118,6 @@ class Engine{
         void score_moves(Board &board, vector<Moves> &moves, Moves best_m, int ply);
         void score_quiesce_moves(vector<Moves> &moves);  
 
-    
         void halt() {
             stop = true;
         }
