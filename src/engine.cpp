@@ -28,7 +28,7 @@ int Engine::set_tt_memory(TTMAP &tt_table, int megabytes) {
 }
 
 //quiesce search (run till position is stable)
-inline int Engine::quiesce(Board &board, int alpha, int beta, int stand_pat, int depth = QUIESCE_MAX_DEPTH) {
+inline int Engine::quiesce(Board &board, int alpha, int beta, int depth = QUIESCE_MAX_DEPTH) {
     int capture_moves = 0;
     int value;
     Moves best_m, tt_move;
@@ -45,8 +45,8 @@ inline int Engine::quiesce(Board &board, int alpha, int beta, int stand_pat, int
     }
 
     if (nodes & 2047 && check_limits()) {return 0;}
+    int stand_pat = evaluation(board);
     if (depth <= 0) {return stand_pat;}
-
     //eval pruning for quiesce search
     //if the static eval is above beta we don't need to keep searching
     if (stand_pat >= beta) {return stand_pat;}
@@ -78,7 +78,7 @@ inline int Engine::quiesce(Board &board, int alpha, int beta, int stand_pat, int
             continue;
         }
         capture_moves++;
-        value = -quiesce(board, -beta, -alpha, evaluation(board), depth-1);
+        value = -quiesce(board, -beta, -alpha, depth-1);
         board.pop();
         //alpha beta pruning
         if (value > best_v) {
@@ -128,13 +128,13 @@ inline int Engine::negamax(Board &board, int alpha, int beta, int depth, int ply
         tt_move = tt_table[board.zobrist_hash].move;
     }   
 
-    //static evaluation of position
-    int eval; 
-    eval = evaluation(board);
     //eval/quiesce
     if (depth <= 0) {
-        return quiesce(board, alpha, beta, eval);
+        return quiesce(board, alpha, beta);
     }
+    //static evaluation of position
+    int eval = evaluation(board);
+
     //count node
     nodes++;
 

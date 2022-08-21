@@ -111,7 +111,7 @@ class Engine{
         inline void update_pv(Moves &move, int ply);
         inline bool check_limits();
 
-        inline int quiesce(Board &board, int alpha, int bta, int stand_pat, int depth);
+        inline int quiesce(Board &board, int alpha, int beta, int depth);
         inline int negamax(Board &board, int alpha, int beta, int depth, int ply, bool null);
         inline void iterative_deepening(Board& board);
         void search(Board& board, EngineLimits &limits);
