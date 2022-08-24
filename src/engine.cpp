@@ -212,7 +212,7 @@ inline int Engine::negamax(Board &board, int alpha, int beta, int depth, int ply
         //zero window
         if (legal_moves > 1 || !is_pv) {  
             value = -negamax(board, -alpha-1, -alpha, depth-1-R, ply+1); //search with lmr
-            //search again if late move didn't fail low
+            //research the move at full depth if late move didn't fail low
             if (R && value > alpha) {
                 value = -negamax(board, -alpha-1, -alpha, depth-1, ply+1);
             }

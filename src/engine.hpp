@@ -92,12 +92,6 @@ class Engine{
         int TT_MAX_SIZE = 1e7;
         TTMAP tt_table;
         int set_tt_memory(TTMAP &tt_table, int megabytes);
-
-        //search parameters
-        int search_depth;
-        int time_for_move;
-        time_point<steady_clock> start_time;
-
         //engine.cpp
         //initialize engine table
         Engine() {
@@ -115,17 +109,21 @@ class Engine{
         inline int negamax(Board &board, int alpha, int beta, int depth, int ply, bool null);
         inline void iterative_deepening(Board& board);
         void search(Board& board, EngineLimits &limits);
+
+        //search parameters
+        int search_depth;
+        int time_for_move;
+        time_point<steady_clock> start_time;
         
         //eval.cpp
         static int evaluation(Board &board);
-        void move_ordering(vector<Moves> &moves);
 
         //sort.cpp
         void score_moves(Board &board, vector<Moves> &moves, Moves tt_move, int ply);
         void score_quiesce_moves(vector<Moves> &moves, Moves tt_move);  
         bool see(Board &board, Moves move, int threshold);
 
-        void halt() {
+        inline void halt() {
             stop = true;
         }
 };

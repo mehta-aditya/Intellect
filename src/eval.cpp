@@ -47,4 +47,3 @@ int Engine::evaluation(Board &board){
     value = (mg_value * phase + eg_value * (256-phase))/256;
     return (board.turn == WHITE) ? value : -value;
 }
-

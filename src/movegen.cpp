@@ -316,7 +316,6 @@ vector<Moves> Board::generate_psuedolegal_moves(){
   move_list.reserve(MOVE_LIST_RESERVE);
   generate_piece_captures(move_list);
   generate_castling_moves(move_list);
-  
   generate_piece_quiets(move_list);
   return move_list;
 }

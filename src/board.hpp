@@ -77,6 +77,7 @@ struct Moves {
     return false;
   }
 };
+
 //Structure for a piece
 struct Piece {
   int color, type;
@@ -149,9 +150,9 @@ class Board {
     U64 attackers_to(int square, int color, U64 blockers);
     int moves_at(int square, int color, int piece);
 
-    void generate_castling_moves(vector<Moves>& move_list);
-    void generate_piece_quiets(vector<Moves>& move_list);
-    void generate_piece_captures(vector<Moves>& move_list);
+    void generate_castling_moves(const vector<Moves> move_list);
+    void generate_piece_quiets(const vector<Moves> move_list);
+    void generate_piece_captures(const vector<Moves> move_list);
     vector<Moves> generate_psuedolegal_moves();
 
 
