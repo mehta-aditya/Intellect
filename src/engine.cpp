@@ -102,7 +102,7 @@ inline int Engine::quiesce(Board &board, int alpha, int beta, int depth = QUIESC
     if (tt_table.size() >= TT_MAX_SIZE) {
         tt_table.erase(tt_table.begin());
     }
-    tt_table[board.zobrist_hash] = TTEntry(best_v, best_m, -1, flag);
+    tt_table[board.zobrist_hash] = TTEntry(best_v, best_m, 0, flag);
 
     return best_v;
 }
@@ -143,6 +143,10 @@ inline int Engine::negamax(Board &board, int alpha, int beta, int depth, int ply
         tt_move = tt_table[board.zobrist_hash].move;
     }   
 
+    //IID reduction technique
+    //If there was no value in transposition table and we meet other requirements we can reduce depth
+    if (depth >= 4 && !is_pv && !is_tt) {depth--;}
+
     //static evaluation of position
     //use transposition table eval if it's available
     int eval;
@@ -181,10 +185,6 @@ inline int Engine::negamax(Board &board, int alpha, int beta, int depth, int ply
         if (value < alpha) {return value;}
     }
 
-    //IID reduction technique
-    //If there was no value in transposition table and we meet other requirements we can reduce depth
-    if (depth >= 5 && !is_pv && !is_tt) {depth--;}
-
     //move ordering
     vector<Moves> moves = board.generate_psuedolegal_moves();
     score_moves(board, moves, tt_move, ply);
@@ -195,14 +195,14 @@ inline int Engine::negamax(Board &board, int alpha, int beta, int depth, int ply
         //check if a move is tactical or related to checks
         not_tactical = move.captured == NO_PIECE && !in_check && move.promoted == PAWN_I;
 
-        //late move pruning (LMP) 
-        //we can prune moves that are late in the node cause they are probably not as good
+        // late move pruning (LMP) 
+        // we can prune moves that are late in the node cause they are probably not as good
         if (depth <= 7 && not_tactical && !is_pv && legal_moves > LMP_TABLE[depth]) {
             continue;
         }
 
-        //futility pruning
-        //if we are far enough below alpha we can prune
+        // futility pruning
+        // if we are far enough below alpha we can prune
         if (depth <= 7 && legal_moves > 3 && not_tactical && !is_pv && eval + FUTILITY_MARGIN[depth] < alpha) {
             continue;
         }
@@ -221,10 +221,13 @@ inline int Engine::negamax(Board &board, int alpha, int beta, int depth, int ply
         //Reduces search depth for moves that are late in the node
         if (depth >= 3 && legal_moves >= 3 && not_tactical) {
             R = LMR_TABLE[depth][legal_moves];
-            //don't reduce as much if PV or has good history
+            //don't reduce as much if PV, has good history or is tactical
             R -= is_pv;
-            R -= history[board.turn][move.piece][move.to_square]/1200;
+            R -= history[board.turn][move.piece][move.to_square]/1000;
         }
+        //keep reductions within proper bounds
+        R = max(min(R, depth-1), 0);
+
 
         //zero window
         if (legal_moves > 1 || !is_pv) {  

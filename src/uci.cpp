@@ -118,6 +118,7 @@ void UCI::go(istringstream &is) {
 //start uci engine
 void UCI::init() {
     engine.reset();
+    engine.init_eval();
     //start off with the identifying info
     cout << "Intellect " << ENGINE_VER << " by Aditya Mehta" << endl;
     string cin_line,cin_part;

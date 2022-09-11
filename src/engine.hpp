@@ -16,7 +16,7 @@ const int OVERHEAD_TIME = 25;
 const int DEFUALT_TT_MB = 128;
 const int QUIESCE_MAX_DEPTH = 10;
 //Values for different pruning and reduction methods
-const int REVERSE_FUTILITY_MARGIN = 85;
+const int REVERSE_FUTILITY_MARGIN = 80;
 const int RAZORING_MARGIN = 200;
 const int DELTA_MARGIN = 1000;
 const int LMP_TABLE[8] = {0, 8, 10, 12, 15, 20, 22, 24}; //lmp move cutoff
@@ -78,6 +78,8 @@ typedef unordered_map<U64, TTEntry> TTMAP;
 class Engine{
     public: 
         //init
+        void init_eval();
+
         bool stop = false;
         int nodes = 0;
         //used for triangular pv table
