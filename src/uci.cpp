@@ -14,12 +14,8 @@ int UCI::perft(int depth){
     board.push(move);
     if (!board.in_check(board.turn^1)) {
         nodes += perft(depth - 1);
-        // if (move.flag == CAPTURE_F || move.flag == PROMOTE_CAP_F) {captures++;}
-        // if (move.flag == KS_F || move.flag == QS_F) {castles++;}
-        // if (board.in_check(board.turn)) {checks++;}
-        // if (move.flag == PROMOTE_F || move.flag == PROMOTE_CAP_F) {promotions++;}
     }
-    
+    nodes += perft(depth - 1);
     board.pop();
   }
   return nodes;
@@ -61,7 +57,6 @@ Moves UCI::to_move(string &uci_move) {
 
 //position command
 void UCI::set_position(istringstream &is) {
-    //engine.tt_table.clear();
     string cin_part;
     is >> cin_part;
     //set to starting position
@@ -122,6 +117,7 @@ void UCI::go(istringstream &is) {
 
 //start uci engine
 void UCI::init() {
+    engine.reset();
     //start off with the identifying info
     cout << "Intellect " << ENGINE_VER << " by Aditya Mehta" << endl;
     string cin_line,cin_part;
@@ -137,6 +133,7 @@ void UCI::init() {
             break;
         }
         //stop search
+        //*add in feature to stop in middle of search
         else if (cin_part == "stop") {
             if (searching) {engine.stop = true;}
         }
@@ -152,6 +149,7 @@ void UCI::init() {
             cout << "readyok" << endl;
         }
         else if (cin_part == "ucinewgame") {
+            engine.reset();
             board.set_fen(STARTING_FEN);
         }
         else if (cin_part == "position") {

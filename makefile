@@ -17,11 +17,14 @@ OBJECTS = $(addprefix $(ODIR)/, $(OFILES))
 #HEADERS = $(addprefix $(SDIR)/, $(HFILES))
 
 TARGET = intellect
-
+TESTING_TARGET = intellect_test
 all: $(TARGET)
 
 $(TARGET): $(OBJECTS)
 	$(CC) $(CFLAGS) $(OBJECTS) -o $(TARGET) 
+	
+$(TESTING_TARGET): $(OBJECTS)
+	$(CC) $(CFLAGS) $(OBJECTS) -o $(TESTING_TARGET) 
 
 $(ODIR)/%.o : $(SDIR)/%.cpp
 	$(CC) $(CFLAGS) -c $< -o $@

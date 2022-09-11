@@ -5,11 +5,11 @@
 enum ORDER {
     CAPTURE_O = 4000,
     PROMOTION_O = 3500,
-    CASTLING_O = 3000,
     KILLER_O = 3500, 
     COUNTERMOVE_O = 100,
     TT_O = 5000,
-    PV_O = 6000
+    PV_O = 6000,
+    SEE_O = 3000 //not a bonus as this is subtracted is SEE is negative
 };
 //table used to compute move ordering for captures
 const int MVV_LVA_TABLE[6][6] = {
@@ -26,11 +26,10 @@ void Engine::score_moves(Board &board, vector<Moves> &moves, Moves tt_move, int 
     for (Moves &move : moves) {
         if (move == pv[0][ply]) {move.order = PV_O;}
         else if (move == tt_move) {move.order = TT_O;}
-        else if (move.flag == CAPTURE_F || move.flag == EN_PASSANT_F) {move.order = CAPTURE_O + MVV_LVA_TABLE[move.captured][move.piece];}
+        else if (move.flag == CAPTURE_F || move.flag == EN_PASSANT_F) {move.order = CAPTURE_O + MVV_LVA_TABLE[move.captured][move.piece] - (!see(board, move, 0))*SEE_O;}
         else if (move == killers[0][ply]) {move.order = KILLER_O;}
-        else if (move == killers[1][ply]) {move.order = KILLER_O-1;}
+        else if (move == killers[1][ply]) {move.order = KILLER_O/2;}
         else if (move.flag == NO_FLAG || move.flag == DOUBLE_PAWN_F) {move.order = history[board.turn][move.piece][move.to_square];}
-        //else if (move.flag == KS_F || move.flag == QS_F) {move.order = CASTLING_O;}
         else if (move.flag == PROMOTE_F) {move.order = PROMOTION_O + PIECE_VALUES[move.promoted];}
         else if (move.flag == PROMOTE_CAP_F) {move.order = PROMOTION_O + PIECE_VALUES[move.promoted] + MVV_LVA_TABLE[move.captured][move.piece];}
         //give countermove bonus
@@ -50,8 +49,8 @@ void Engine::score_quiesce_moves(vector<Moves> &moves, Moves tt_move) {
 //static engine evaluation
 //used to prune captures in quiesce search
 bool Engine::see(Board &board, Moves move, int threshold){
-
-    int value = PIECE_VALUES[move.captured];
+    int color = board.turn^1;
+    int value = PIECE_VALUES[board.piece_at(move.to_square, color)];
     if (move.flag == PROMOTE_CAP_F) {value += PIECE_VALUES[move.promoted] - PIECE_VALUES[move.piece];}
     value -= threshold;
     if (value < 0) {return false;}
@@ -64,7 +63,6 @@ bool Engine::see(Board &board, Moves move, int threshold){
     blockers ^= SQUARES_BB[move.from_square];
     blockers |= SQUARES_BB[move.to_square];
     if (move.flag == EN_PASSANT_F) {blockers ^= SQUARES_BB[board.ep_square];}
-    int color = board.turn^1;
     int captured;
     U64 temp;
     U64 attack_board = (board.attackers_to(move.to_square, board.turn, blockers) | board.attackers_to(move.to_square, color, blockers)) & blockers;

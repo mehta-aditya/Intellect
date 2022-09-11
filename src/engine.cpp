@@ -1,4 +1,5 @@
 #include "engine.hpp"
+#include "eval.hpp"
 
 inline void Engine::update_pv(Moves &move, int ply) {
     pv[ply][ply] = move; //update pv table
@@ -12,9 +13,9 @@ inline void Engine::update_pv(Moves &move, int ply) {
 }
 
 //check engine limits
-inline bool Engine::check_limits() {
+inline bool Engine::check_limits(int depth) {
     int elapsed_time = duration_cast<milliseconds>(steady_clock::now() - start_time).count();
-    if (elapsed_time >= (time_for_move)) {stop = true;}
+    if (elapsed_time >= (time_for_move) || (depth >= MAX_DEPTH-1)) {stop = true;}
     return stop;
 }
 
@@ -32,9 +33,15 @@ inline int Engine::quiesce(Board &board, int alpha, int beta, int depth = QUIESC
     int capture_moves = 0;
     int value;
     Moves best_m, tt_move;
-    int best_v = -MATE_V-MAX_DEPTH-1;
-    bool is_pv = beta - alpha > 1;
+    int best_v = -MAX_V-MAX_DEPTH-1;
+    bool is_pv = beta - alpha != 1;
     TTFLAG flag = TT_ALPHA;
+    //count nodes
+    nodes++;
+    
+    if (nodes & 2047 && check_limits(depth)) {return 0;}
+    //if this quiesce is really deep then just return eval
+    if (depth <= 0) {return evaluation(board);} 
 
     //check transposition table: if it is not root, 
     if(!is_pv && tt_table.find(board.zobrist_hash) != tt_table.end()) {   
@@ -44,9 +51,8 @@ inline int Engine::quiesce(Board &board, int alpha, int beta, int depth = QUIESC
         tt_move = tt_table[board.zobrist_hash].move;
     }
 
-    if (nodes & 2047 && check_limits()) {return 0;}
     int stand_pat = evaluation(board);
-    if (depth <= 0) {return stand_pat;}
+
     //eval pruning for quiesce search
     //if the static eval is above beta we don't need to keep searching
     if (stand_pat >= beta) {return stand_pat;}
@@ -57,8 +63,7 @@ inline int Engine::quiesce(Board &board, int alpha, int beta, int depth = QUIESC
 
     if (stand_pat > alpha) {alpha = stand_pat;}
     best_v = stand_pat;
-    //count nodes
-    nodes++;
+
     //iterate through moves
     vector<Moves> moves;
     moves.reserve(MOVE_LIST_RESERVE);
@@ -69,8 +74,7 @@ inline int Engine::quiesce(Board &board, int alpha, int beta, int depth = QUIESC
     for (Moves &move : moves) {
         //static engine evaluation pruning (SEE pruning)
         //this prunes bad captures right away
-        if (!see(board, move, 1)) {continue;}
-
+        if (!see(board, move, 0)) {continue;}
         board.push(move); // play move
         //check move legality; if it isn't legal skip the move
         if(board.in_check(board.turn^1)) {
@@ -84,10 +88,12 @@ inline int Engine::quiesce(Board &board, int alpha, int beta, int depth = QUIESC
         if (value > best_v) {
             best_v = value;
             best_m = move;
-            if (value > alpha) {alpha = value;}
-            if (alpha >= beta) {
+            if (value >= beta) {
                 flag = TT_BETA;
                 break;
+            }
+            if (value > alpha) {
+                alpha = value;
             }
         }        
     }
@@ -96,7 +102,7 @@ inline int Engine::quiesce(Board &board, int alpha, int beta, int depth = QUIESC
     if (tt_table.size() >= TT_MAX_SIZE) {
         tt_table.erase(tt_table.begin());
     }
-    tt_table[board.zobrist_hash] = TTEntry(best_v, best_m, 0, flag);
+    tt_table[board.zobrist_hash] = TTEntry(best_v, best_m, -1, flag);
 
     return best_v;
 }
@@ -104,7 +110,7 @@ inline int Engine::quiesce(Board &board, int alpha, int beta, int depth = QUIESC
 //run a negamax (PVS) search
 inline int Engine::negamax(Board &board, int alpha, int beta, int depth, int ply=0, bool null=true) {
     int value;
-    int best_v = -MATE_V-MAX_DEPTH-1;
+    int best_v = -MAX_V-MAX_DEPTH-1;
     Moves best_m, tt_move;
     int legal_moves = 0; // number of legal moves tested in this node
     TTFLAG flag = TT_ALPHA; //presume we will fail high
@@ -114,8 +120,17 @@ inline int Engine::negamax(Board &board, int alpha, int beta, int depth, int ply
     
     pv_len[ply] = ply;
 
-    //*Check for draw (threefold repition and 50 move)
-    if (ply && board.is_repetition()) {return DRAW_V;}
+    //Check for draw (threefold repition and 50 move)
+    if (ply && (board.is_repetition() | (board.halfmove_clock >= 100 && !(in_check)))) {return DRAW_V;}
+
+    //search extension for being in check
+    if (in_check) {depth++;}
+    //eval/quiesce
+    if (depth <= 0) {
+        return quiesce(board, alpha, beta);
+    }
+    //count node
+    nodes++;
 
     bool is_tt = tt_table.find(board.zobrist_hash) != tt_table.end(); //checks if the position is in the transposition table
     //check transposition table if the position has appeared before
@@ -128,15 +143,13 @@ inline int Engine::negamax(Board &board, int alpha, int beta, int depth, int ply
         tt_move = tt_table[board.zobrist_hash].move;
     }   
 
-    //eval/quiesce
-    if (depth <= 0) {
-        return quiesce(board, alpha, beta);
-    }
     //static evaluation of position
-    int eval = evaluation(board);
-
-    //count node
-    nodes++;
+    //use transposition table eval if it's available
+    int eval;
+    if (is_tt && !in_check) {eval = tt_table[board.zobrist_hash].value;}
+    else {
+        eval = evaluation(board);
+    }
 
     //reverse futility pruning/static null move pruning
     //if we are sufficiently above beta we can prune
@@ -150,23 +163,27 @@ inline int Engine::negamax(Board &board, int alpha, int beta, int depth, int ply
     //if we don't play a move but still have a good position we can prune
     // *add methods to stop zugzwang 
     int R;
-    if (null && !in_check && depth >= 2 && eval >= beta && !is_pv) {
-        R = 3 + (depth/8);
+    if (null && !in_check && depth >= 3 && eval >= beta && !is_pv) {
+        R = 3 + (depth/6);
         board.push_null();
         value = -negamax(board, -beta, -beta+1, depth-R-1, ply+1, false);
         board.pop_null();
         //check for beta cutoff
-        if (value >= beta && !(beta >= MATE_V-MAX_DEPTH || beta <= -MATE_V+MAX_DEPTH)) {
+        if (value >= beta) {
             return value;
         }
     } 
 
     //razoring
     //if we are sufficiently below alpha then we can prune
-    if (depth <= 3 && !is_pv && !in_check && eval + RAZORING_MARGIN*depth <= alpha ) {
-        value = quiesce(board, alpha, beta, eval);
+    if (depth <= 3 && !is_pv && !in_check && eval + RAZORING_MARGIN*depth <= alpha) {
+        value = quiesce(board, alpha, beta);
         if (value < alpha) {return value;}
     }
+
+    //IID reduction technique
+    //If there was no value in transposition table and we meet other requirements we can reduce depth
+    if (depth >= 5 && !is_pv && !is_tt) {depth--;}
 
     //move ordering
     vector<Moves> moves = board.generate_psuedolegal_moves();
@@ -202,11 +219,11 @@ inline int Engine::negamax(Board &board, int alpha, int beta, int depth, int ply
         R = 0;
         //use late move reduction (LMR)
         //Reduces search depth for moves that are late in the node
-        if (depth >= 3 && legal_moves > 3 && not_tactical) {
+        if (depth >= 3 && legal_moves >= 3 && not_tactical) {
             R = LMR_TABLE[depth][legal_moves];
             //don't reduce as much if PV or has good history
             R -= is_pv;
-            R -= history[board.turn][move.piece][move.to_square]/2000;
+            R -= history[board.turn][move.piece][move.to_square]/1200;
         }
 
         //zero window
@@ -220,8 +237,7 @@ inline int Engine::negamax(Board &board, int alpha, int beta, int depth, int ply
             //search again using a full window
             if (value > alpha && value < beta) {
                 value = -negamax(board, -beta, -alpha, depth-1, ply+1);
-            }
-                     
+            } 
         }
         //full window
         else {
@@ -230,13 +246,13 @@ inline int Engine::negamax(Board &board, int alpha, int beta, int depth, int ply
         board.pop(); //unmake move
 
         //make sure we don't have to stop
-        if (nodes & 2047 && (check_limits() || depth >= MAX_DEPTH)) {return 0;}
+        if (nodes & 2047 && (check_limits(depth))) {return 0;}
 
         //alpha beta pruning
         if (value > best_v) {
             //update best move
-            best_v = value;
-            best_m = move; 
+            best_v = value; 
+            best_m = move;   
 
             //fail high/cut node: this is so good that the opponent wouldn't let us do this
             if(value >= beta) {
@@ -269,8 +285,7 @@ inline int Engine::negamax(Board &board, int alpha, int beta, int depth, int ply
             else {
                 history[board.turn][move.piece][move.to_square] -= 1; 
             }
-        }
-        
+        }       
     }
     
     //check for stalemate and checkmate
@@ -281,6 +296,8 @@ inline int Engine::negamax(Board &board, int alpha, int beta, int depth, int ply
         else {return DRAW_V;}
     }
 
+    if (board.halfmove_clock >= 100) {}
+
     //store transposition table values
     if (tt_table.size() >= TT_MAX_SIZE) {
         tt_table.erase(tt_table.begin());
@@ -289,26 +306,52 @@ inline int Engine::negamax(Board &board, int alpha, int beta, int depth, int ply
 
     return best_v;
 }
+
 //iterative deepening loop
 inline void Engine::iterative_deepening(Board& board) {
     Moves best_move; //holds best move from previous play
     start_time = steady_clock::now();   
-    int alpha = -MAX;
-    int beta = MAX;
-
+    int alpha = -MAX_V, beta = MAX_V;
+    int value = 0;
+    int upperbound, lowerbound;
+    int delta_v = 20;
     for (int depth = 1; depth <= search_depth; depth++) {       
         //check engine limits
-        if (check_limits()) {break;}
-        //calculate
-        int value = negamax(board, alpha, beta, depth, 0);
+        if (check_limits(depth)) {break;}
+        //value = negamax(board, alpha, beta, depth);
+        //use aspiration windows
+        if (depth <= 4) {
+           value = negamax(board, alpha, beta, depth);
+        }
+        else {
+            while (!stop) {
+                lowerbound = max(alpha, value-delta_v);
+                upperbound = min(beta, value+delta_v);
+                value = negamax(board, lowerbound, upperbound, depth);
+                //we failed low at root
+                if (value <= lowerbound) {
+                    upperbound = (upperbound+lowerbound)/2;
+                    lowerbound = max(value - delta_v, alpha);
+                }
+                //we failed high at root
+                else if (value >= upperbound) {
+                    upperbound = min(beta, value+delta_v);
+                }
+                else {break;}
+                //increase the window if we were outside alpha and beta
+                delta_v += delta_v/3;
+            }
+        }
 
-        if (check_limits()) {break;}
+    
+        if (check_limits(depth)) {break;}
         int elapsed_time = duration_cast<milliseconds>(steady_clock::now() - start_time).count();
-
 
         //print uci info
         cout << "info";
-        cout << " score cp " << value;
+        if (value < -MATE_V+MAX_DEPTH+1) {cout << " score mate " << (int)((-MATE_V-value+1)/2);}
+        else if (value > MATE_V-MAX_DEPTH-1) {cout << " score mate " << (int)((MATE_V-value+1)/2);}
+        else {cout << " score cp " << value;}
         cout << " depth " << depth;
         cout << " time " << elapsed_time;
         cout << " nodes " << nodes;
@@ -351,7 +394,8 @@ void Engine::search(Board& board, EngineLimits &limits) {
         int divider;
         limits.moves_to_go == 0 ? divider = TIME_DIVIDER : divider = limits.moves_to_go;
 
-        time_for_move = (limits.co_time[board.turn] + limits.co_time[board.turn]/divider)/divider + limits.co_inc[board.turn] - OVERHEAD_TIME;
+        time_for_move = limits.co_time[board.turn]/divider - OVERHEAD_TIME;
     }
+    time_for_move = max(time_for_move, 10);
     iterative_deepening(board);
 }

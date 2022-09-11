@@ -1,5 +1,6 @@
 #include "attacks.hpp"
 #include "uci.hpp"
+#include "eval.hpp"
 
 int main(){
   Attacks::init();

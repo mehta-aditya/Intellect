@@ -92,6 +92,7 @@ struct Position{
   Moves move;
   bool castling_rights[2][2];
   int ep_square;
+  int halfmove_clock;
   U64 zobrist_hash; //only for null moves
   Position(bool cr[2][2], int ep) {
     castling_rights[WHITE][KINGSIDE_I] = cr[WHITE][KINGSIDE_I];
@@ -113,7 +114,7 @@ inline int get_lsb(U64 bb) {
     return i;
 }
 
-//Gets index of least lsb and turns it to 0
+//Gets index of least lsb and turns it to an integer
 inline static int pop_lsb(U64* bb) {
     int i = __builtin_ctzll(*bb);
     *bb &= *bb - 1;
@@ -121,7 +122,7 @@ inline static int pop_lsb(U64* bb) {
 }
 
 
-//Renders a bitboard (a tool)
+//Renders a bitboard (a tool used for debugging purposes)
 void bb_rendering(U64 bitboard);
 
 //The chess board
@@ -132,6 +133,7 @@ class Board {
     int turn = WHITE;
     bool castling_rights[2][2]; //[color][types] .//[0:White or 1: Black][0:Kingside or 1:Queenside]
     int ep_square;
+    int halfmove_clock = 0;
     //No Piece, WP, WN, WB, WR, WQ, WK, BP, BN, BB, BR, BQ, BK
     U64 piece_boards[2][6] = {EMPTY_BB};
     U64 piece_co[2] = {EMPTY_BB};
@@ -150,14 +152,14 @@ class Board {
     U64 attackers_to(int square, int color, U64 blockers);
     int moves_at(int square, int color, int piece);
 
-    void generate_castling_moves(const vector<Moves> move_list);
-    void generate_piece_quiets(const vector<Moves> move_list);
-    void generate_piece_captures(const vector<Moves> move_list);
+    void generate_castling_moves(vector<Moves>& move_list);
+    void generate_piece_quiets(vector<Moves>& move_list);
+    void generate_piece_captures(vector<Moves>& move_list);
     vector<Moves> generate_psuedolegal_moves();
 
 
     //move.cpp
-    inline int piece_at(int square, int color);
+    int piece_at(int square, int color);
     //with zobrist updates
     inline void add_piece(int square, int color, int type);
     inline void remove_piece(int square, int color, int type);

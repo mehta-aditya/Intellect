@@ -6,22 +6,6 @@ bool Board::is_square_attacked(int square, int color) {
   U64 attack_board;
   int opp_col = color^1;
   U64 both_blockers = piece_co[color] | piece_co[opp_col];
-
-  //pawn attacks
-  attack_board = Attacks::PAWN_ATTACKS[color][square];
-  if (attack_board & piece_boards[opp_col][PAWN_I]) {
-    return true;
-  }
-  //knight attacks
-  attack_board = Attacks::KNIGHT_ATTACKS[square];
-  if (attack_board & piece_boards[opp_col][KNIGHT_I]) {
-    return true;
-  }
-  //king attacks
-  attack_board = Attacks::KING_ATTACKS[square];
-  if (attack_board & piece_boards[opp_col][KING_I]) {
-    return true;
-  }
   //diag attacks
   attack_board = Attacks::get_diag_attacks(square, both_blockers);
   if (attack_board & (piece_boards[opp_col][BISHOP_I] | piece_boards[opp_col][QUEEN_I])) {
@@ -32,6 +16,23 @@ bool Board::is_square_attacked(int square, int color) {
   if (attack_board & (piece_boards[opp_col][ROOK_I] | piece_boards[opp_col][QUEEN_I])) {
     return true;
   }
+  //knight attacks
+  attack_board = Attacks::KNIGHT_ATTACKS[square];
+  if (attack_board & piece_boards[opp_col][KNIGHT_I]) {
+    return true;
+  }
+  //pawn attacks
+  attack_board = Attacks::PAWN_ATTACKS[color][square];
+  if (attack_board & piece_boards[opp_col][PAWN_I]) {
+    return true;
+  }
+
+  //king attacks
+  attack_board = Attacks::KING_ATTACKS[square];
+  if (attack_board & piece_boards[opp_col][KING_I]) {
+    return true;
+  }
+
   return false;
 }
 //gets all the pieces that are attacking a specific square
@@ -89,7 +90,6 @@ int Board::moves_at(int square, int color, int piece) {
   }
 
 }
-
 
 void Board::generate_castling_moves(vector<Moves>& move_list){
   U64 blockers = piece_co[turn] | piece_co[turn^1];
@@ -175,7 +175,6 @@ void Board::generate_piece_quiets(vector<Moves>& move_list){
   while(piece_board) {
     from_square = pop_lsb(&piece_board);
     attack_board = Attacks::get_diag_attacks(from_square, blockers);
-    //attack_board = Attacks::sliding_attacks(from_square, blockers, Attacks::DIAG_DELTAS);
     BITMASK_CLEAR(attack_board, blockers);
     while (attack_board) {
       to_square = pop_lsb(&attack_board);
@@ -187,7 +186,6 @@ void Board::generate_piece_quiets(vector<Moves>& move_list){
   while(piece_board) {
     from_square = pop_lsb(&piece_board);
     attack_board = Attacks::get_line_attacks(from_square, blockers);
-    //attack_board = Attacks::sliding_attacks(from_square, blockers, Attacks::LINE_DELTAS);
     BITMASK_CLEAR(attack_board, blockers);
     while (attack_board) {
       to_square = pop_lsb(&attack_board);
@@ -199,7 +197,6 @@ void Board::generate_piece_quiets(vector<Moves>& move_list){
   while(piece_board) {
     from_square = pop_lsb(&piece_board);
     attack_board = Attacks::get_queen_attacks(from_square, blockers);
-    //attack_board = Attacks::sliding_attacks(from_square, blockers, Attacks::DIAG_DELTAS) | Attacks::sliding_attacks(from_square, blockers, Attacks::LINE_DELTAS);
     BITMASK_CLEAR(attack_board, blockers);
     while (attack_board) {
       to_square = pop_lsb(&attack_board);
@@ -280,7 +277,6 @@ void Board::generate_piece_captures(vector<Moves>& move_list){
   while(piece_board) {
     from_square = pop_lsb(&piece_board);
     attack_board = Attacks::get_line_attacks(from_square, both_blockers);
-    //attack_board = Attacks::sliding_attacks(from_square, both_blockers, Attacks::LINE_DELTAS);
     BITMASK_INTERSECT(attack_board, blockers);
     while (attack_board) {
       to_square = pop_lsb(&attack_board);

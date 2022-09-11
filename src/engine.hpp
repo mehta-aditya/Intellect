@@ -11,12 +11,12 @@ using TTFLAG = uint_fast8_t;
 //Key Engine Parameters
 const int MAX_DEPTH = 64;
 const int MAX_TIME = 300000000;
-const int TIME_DIVIDER = 50;
-const int OVERHEAD_TIME = 50;
+const int TIME_DIVIDER = 35;
+const int OVERHEAD_TIME = 25;
 const int DEFUALT_TT_MB = 128;
-const int QUIESCE_MAX_DEPTH = 5;
+const int QUIESCE_MAX_DEPTH = 10;
 //Values for different pruning and reduction methods
-const int REVERSE_FUTILITY_MARGIN = 100;
+const int REVERSE_FUTILITY_MARGIN = 85;
 const int RAZORING_MARGIN = 200;
 const int DELTA_MARGIN = 1000;
 const int LMP_TABLE[8] = {0, 8, 10, 12, 15, 20, 22, 24}; //lmp move cutoff
@@ -24,12 +24,13 @@ const int FUTILITY_MARGIN[8] = {0, 300, 450, 600, 750, 900, 1050, 1200}; //futil
 const int MAX_HISTORY_V = 3000; //based on move ordering values
 
 //Values used in engine eval
-enum VALUES {
-    MAX = 20000,
+enum VALUES : int {
+    MAX_V = 20000,
     MATE_V = 10000,
     DRAW_V = 0
 };
 
+//TT_EXACT: within alpha and beta, TT_ALPHA: below alpha, TT_BETA: above beta
 enum TTFlags : TTFLAG{
     TT_EXACT = 0,
     TT_BETA = 1,
@@ -103,7 +104,7 @@ class Engine{
             }
         }
         inline void update_pv(Moves &move, int ply);
-        inline bool check_limits();
+        inline bool check_limits(int depth);
 
         inline int quiesce(Board &board, int alpha, int beta, int depth);
         inline int negamax(Board &board, int alpha, int beta, int depth, int ply, bool null);
@@ -125,6 +126,13 @@ class Engine{
 
         inline void halt() {
             stop = true;
+        }
+
+        inline void reset() {
+            tt_table.clear();
+            memset(killers, 0, sizeof(killers));
+            memset(countermoves, 0, sizeof(countermoves));
+            memset(history, 0, sizeof(history));
         }
 };
 

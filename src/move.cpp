@@ -1,8 +1,9 @@
 #include "board.hpp"
+#include "eval.hpp"
 #include "zobrist.hpp"
 
 //Gets the piece at a square from the bitboards
-inline int Board::piece_at(int square, int color){
+int Board::piece_at(int square, int color){
     for (int p = PAWN_I; p <= KING_I; p++){
         if (SQUARES_BB[square] & piece_boards[color][p]) {
             return p;
@@ -181,9 +182,16 @@ void Board::push(Moves move){
         }
     }
     pos.move = move;
+    pos.halfmove_clock = halfmove_clock;
     position_history.push(pos);
     //swap turn
     turn = opp_col;
+    //reset halfmove clock
+    if (move.piece == PAWN_I || move.flag == CAPTURE_F || move.flag == PROMOTE_CAP_F) {
+        halfmove_clock = 0;
+    }
+    else {halfmove_clock++;}
+    
     zobrist_hash ^= TURN_ZOBRIST;
 }
 
@@ -251,6 +259,7 @@ void Board::pop(){
     }
 
     turn = opp_col;
+    halfmove_clock = pos.halfmove_clock;
     zobrist_hash = pos_hash;
 }
 
