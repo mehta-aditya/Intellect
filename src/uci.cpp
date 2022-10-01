@@ -154,6 +154,7 @@ void UCI::init() {
             board.set_fen(STARTING_FEN);
         }
         else if (cin_part == "position") {
+            engine.reset();
             set_position(is);
         }
         else if (cin_part == "go") {

@@ -11,7 +11,7 @@ const int MG_MOBILITY[6] = {0, 1, 3, 5, 1, 0};
 const int EG_MOBILITY[6] = {0, 2, 2, 2, 8, 4};
 const int MAX_PIECE_BITS[6] = {4, 8, 13, 14, 27, 8};
 
-const int PASSED_VALUE[8] = {0, 38, 23, 17, 12, 8, 5, 0}; //From white point of view
+const int PASSED_VALUE[8] = {0, 38, 23, 17, 12, 8, 5, 0, }; //From white point of view
 const int EG_PASSED_BONUS = 5;
 
 const int MG_PIECE_VALUES[6] = {82, 337, 365, 477, 1025, 20000};
@@ -190,3 +190,15 @@ const int flip_board[2][64] = {
 };
 
 #endif
+
+
+
+
+
+
+
+
+
+
+
+

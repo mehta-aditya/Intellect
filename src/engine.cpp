@@ -399,6 +399,6 @@ void Engine::search(Board& board, EngineLimits &limits) {
 
         time_for_move = limits.co_time[board.turn]/divider - OVERHEAD_TIME;
     }
-    time_for_move = max(time_for_move, 10);
+    time_for_move = max(time_for_move, 5);
     iterative_deepening(board);
 }
