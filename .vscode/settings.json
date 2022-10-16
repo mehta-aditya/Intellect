@@ -68,6 +68,13 @@
         "xstddef": "cpp",
         "xtr1common": "cpp",
         "fstream": "cpp",
-        "valarray": "cpp"
+        "valarray": "cpp",
+        "any": "cpp",
+        "codecvt": "cpp",
+        "filesystem": "cpp",
+        "functional": "cpp",
+        "numeric": "cpp",
+        "ranges": "cpp",
+        "span": "cpp"
     }
 }

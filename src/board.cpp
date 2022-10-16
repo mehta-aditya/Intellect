@@ -1,4 +1,5 @@
 #include "board.hpp"
+#include "eval.hpp"
 #include "zobrist.hpp"
 
 //Set board position using the FEN (Forsyth–Edwards Notation)
@@ -84,22 +85,25 @@ void Board::set_fen(string fen_set){
         for (int j = 0; j < 64; j++) {
           if (SQUARES[j] == fen_list[i]) {
             ep_square = j;
-            zobrist_hash ^= j % 8;
+            zobrist_hash ^= (j & 7);
             break;
           }
         }
       }
     }
-  }
-
+    //Halfmove clock for 50 move repetition
+    else if (i == 4) {
+      halfmove_clock = stoi(fen_list[i]);
+    }
+    
+  } 
   for (int piece = PAWN_I; piece <= KING_I; piece++) {
     BITMASK_SET(piece_co[WHITE], piece_boards[WHITE][piece]);
     BITMASK_SET(piece_co[BLACK], piece_boards[BLACK][piece]);
   }
-} 
+}
 
 //Helper Function
-
 void Board::render(){
   Piece render_list[64] = {Piece()};
   for (int c = WHITE; c <= BLACK; c++) {
@@ -136,6 +140,7 @@ void Board::reset(){
   memset(castling_rights, true, sizeof(castling_rights[0][0]) * 2 * 2); 
   memset(castling_rights, true, sizeof(castling_rights[0][0]) * 2 * 2); 
   ep_square = NO_SQ;
+  halfmove_clock = 0;
   memset(piece_boards, EMPTY_BB, sizeof(piece_boards[0][0]) * 2 * 6); 
   memset(piece_co, EMPTY_BB, sizeof(piece_co)); 
   zobrist_hash = EMPTY_BB;

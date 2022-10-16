@@ -1,5 +1,6 @@
-
+#include <cstdint>
 using U64 = uint64_t;
+
 
 //Random numbers to hash the board
 const U64 PIECE_ZOBRIST[2][6][64] = {

@@ -1,23 +1,37 @@
 #include "board.hpp"
 #include <cstring>
+#include <math.h>
 #include <unordered_map>
+
 #ifndef ENGINE_HPP
 #define ENGINE_HPP
 
-const int MAX_DEPTH = 32;
+using TTFLAG = uint_fast8_t;
+
+//Key Engine Parameters
+const int MAX_DEPTH = 64;
 const int MAX_TIME = 300000000;
-const int TIME_DIVIDER = 45;
-const int OVERHEAD_TIME = 50;
-const int QUIESCE_MAX_DEPTH = 5;
+const int TIME_DIVIDER = 35;
+const int OVERHEAD_TIME = 25;
+const int DEFUALT_TT_MB = 128;
+const int QUIESCE_MAX_DEPTH = 10;
+//Values for different pruning and reduction methods
+const int REVERSE_FUTILITY_MARGIN = 80;
+const int RAZORING_MARGIN = 200;
+const int DELTA_MARGIN = 1000;
+const int LMP_TABLE[8] = {0, 8, 10, 12, 15, 20, 22, 24}; //lmp move cutoff
+const int FUTILITY_MARGIN[8] = {0, 300, 450, 600, 750, 900, 1050, 1200}; //futility margin
+const int MAX_HISTORY_V = 3000; //based on move ordering values
 
 //Values used in engine eval
-enum VALUES {
-    MAX = 20000,
+enum VALUES : int {
+    MAX_V = 20000,
     MATE_V = 10000,
     DRAW_V = 0
 };
 
-enum TTFlags {
+//TT_EXACT: within alpha and beta, TT_ALPHA: below alpha, TT_BETA: above beta
+enum TTFlags : TTFLAG{
     TT_EXACT = 0,
     TT_BETA = 1,
     TT_ALPHA = 2
@@ -47,10 +61,11 @@ struct EngineLimits {
 };
 
 //Use this structure for the transposition table
-struct TTEntry {
-    int value, depth, flag;
+struct TTEntry{
+    int value, depth;
+    TTFLAG flag;
     Moves move;
-    TTEntry(int v, Moves m, int d, int f) {
+    TTEntry(int v, Moves m, int d, uint_fast8_t f) {
         value = v;
         move = m;
         depth = d;
@@ -58,33 +73,28 @@ struct TTEntry {
     }
     TTEntry() {}
 };
+typedef unordered_map<U64, TTEntry> TTMAP;
 
 class Engine{
     public: 
+        //init
+        void init_eval();
+
         bool stop = false;
         int nodes = 0;
         //used for triangular pv table
         int pv_len[MAX_DEPTH+1];
         Moves pv[MAX_DEPTH+1][MAX_DEPTH+1];
-        //used for killer heuristic and history heuristic
-        Moves killers[2] = {};
-        int history[2][64][64]; //[turn][from][to]
+        //various heuristic tables and pruning
+        Moves killers[2][MAX_DEPTH];
+        Moves countermoves[64][64];
+        int history[2][6][64]; //[turn][piece][to]
+        int LMR_TABLE[MAX_DEPTH][64];
+
         //transposition table
-        const int TT_MAX_SIZE = 1e7;
-        unordered_map<U64, TTEntry> tt_table;
-        
-        //search parameters
-        int search_depth;
-        int time_for_move;
-        time_point<steady_clock> start_time;
-
-         //engine.cpp
-        inline void update_pv(Moves &move, int ply);
-        inline bool check_limits();
-
-        int quiesce(Board &board, int alpha, int beta, int depth);
-        int negamax(Board &board, int alpha, int beta, int depth, int ply, bool null);
-        void iterative_deepening(Board& board);
+        int TT_MAX_SIZE = 1e7;
+        TTMAP tt_table;
+        int set_tt_memory(TTMAP &tt_table, int megabytes);
         //engine.cpp
         //initialize engine table
         Engine() {
@@ -95,33 +105,38 @@ class Engine{
                 }
             }
         }
-        //sort.cpp
-        void score_moves(Board &board, vector<Moves> &moves, Moves tt_move, int ply);
-        void score_quiesce_moves(vector<Moves> &moves, Moves tt_move);  
-        void order_moves(vector<Moves> &moves, int index);
-        bool see(Board &board, Moves move, int threshold);
-
-        //board.cpp
         inline void update_pv(Moves &move, int ply);
-        inline bool check_limits();
+        inline bool check_limits(int depth);
 
         inline int quiesce(Board &board, int alpha, int beta, int depth);
         inline int negamax(Board &board, int alpha, int beta, int depth, int ply, bool null);
         inline void iterative_deepening(Board& board);
         void search(Board& board, EngineLimits &limits);
+
+        //search parameters
+        int search_depth;
+        int time_for_move;
+        time_point<steady_clock> start_time;
         
         //eval.cpp
         int evaluation(Board &board);
-        void move_ordering(vector<Moves> &moves);
+        bool is_insufficient(Board &board);
 
         //sort.cpp
-        void score_moves(Board &board, vector<Moves> &moves, Moves best_m, int ply);
-        void score_quiesce_moves(vector<Moves> &moves);  
+        void score_moves(Board &board, vector<Moves> &moves, Moves tt_move, int ply);
+        void score_quiesce_moves(vector<Moves> &moves, Moves tt_move);  
+        bool see(Board &board, Moves move, int threshold);
 
-        void halt() {
+        inline void halt() {
             stop = true;
         }
-};
 
+        inline void reset() {
+            tt_table.clear();
+            memset(killers, 0, sizeof(killers));
+            memset(countermoves, 0, sizeof(countermoves));
+            memset(history, 0, sizeof(history));
+        }
+};
 
 #endif

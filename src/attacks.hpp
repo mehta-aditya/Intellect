@@ -38,13 +38,17 @@ U64 sliding_attacks(int square, U64 occupied, vector<int> deltas);
 U64 find_magic_number(int square, int bits, vector<int> deltas);
 void init_magic_numbers();
 //Counts bits
+// inline int count_bits(U64 bitboard) {
+//   int count = 0;
+//   while (bitboard) {
+//     count++;
+//     bitboard &= bitboard - 1;
+//   }
+//   return count;
+// }
+
 inline int count_bits(U64 bitboard) {
-  int count = 0;
-  while (bitboard) {
-    count++;
-    bitboard &= bitboard - 1;
-  }
-  return count;
+  return __builtin_popcountll(bitboard);
 }
 
 // //Initilize the magics

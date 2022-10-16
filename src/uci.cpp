@@ -2,9 +2,8 @@
 
 namespace UCI {
     Board board;
-    Engine engine;
+    Engine engine = Engine();
 }
-
 int UCI::perft(int depth){ 
   int nodes = 0;
 
@@ -15,12 +14,8 @@ int UCI::perft(int depth){
     board.push(move);
     if (!board.in_check(board.turn^1)) {
         nodes += perft(depth - 1);
-        // if (move.flag == CAPTURE_F || move.flag == PROMOTE_CAP_F) {captures++;}
-        // if (move.flag == KS_F || move.flag == QS_F) {castles++;}
-        // if (board.in_check(board.turn)) {checks++;}
-        // if (move.flag == PROMOTE_F || move.flag == PROMOTE_CAP_F) {promotions++;}
     }
-    
+    nodes += perft(depth - 1);
     board.pop();
   }
   return nodes;
@@ -62,7 +57,6 @@ Moves UCI::to_move(string &uci_move) {
 
 //position command
 void UCI::set_position(istringstream &is) {
-    engine.tt_table.clear();
     string cin_part;
     is >> cin_part;
     //set to starting position
@@ -89,9 +83,9 @@ void UCI::set_position(istringstream &is) {
 void UCI::go(istringstream &is) {
     EngineLimits limits = EngineLimits();
     string cin_part;
-    int perft = 0;
+    int perft_depth = 0;
     while (is >> cin_part) {
-        if (cin_part == "perft") {is >> perft; break;}
+        if (cin_part == "perft") {is >> perft_depth; break;}
 
         //only search these specific moves
         if (cin_part == "searchmoves") {
@@ -108,23 +102,27 @@ void UCI::go(istringstream &is) {
         else if (cin_part == "movetime") {is >> limits.move_time;}
         else if (cin_part == "infinite") {limits.infinite = true;}
     }    
-    if (!perft) {
+    if (!perft_depth) {
         //the engine should start thinking
         engine.search(board, limits);
     }
     else {
-        divide(perft);
+        auto start_time = steady_clock::now();
+        cout << perft(perft_depth) << endl;
+        int elapsed_time = duration_cast<milliseconds>(steady_clock::now() - start_time).count();
+        cout << "time " << elapsed_time << endl;
     }
 
 }
 
 //start uci engine
 void UCI::init() {
+    engine.reset();
+    engine.init_eval();
     //start off with the identifying info
     cout << "Intellect " << ENGINE_VER << " by Aditya Mehta" << endl;
     string cin_line,cin_part;
     bool searching = false;
-    engine.tt_table.reserve(engine.TT_MAX_SIZE);
     board.reset();
 
     while (getline(cin, cin_line)) {
@@ -136,6 +134,7 @@ void UCI::init() {
             break;
         }
         //stop search
+        //*add in feature to stop in middle of search
         else if (cin_part == "stop") {
             if (searching) {engine.stop = true;}
         }
@@ -151,10 +150,11 @@ void UCI::init() {
             cout << "readyok" << endl;
         }
         else if (cin_part == "ucinewgame") {
-            engine.tt_table.clear();
+            engine.reset();
             board.set_fen(STARTING_FEN);
         }
         else if (cin_part == "position") {
+            engine.reset();
             set_position(is);
         }
         else if (cin_part == "go") {

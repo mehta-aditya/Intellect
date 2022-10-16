@@ -15,7 +15,7 @@ U64 Attacks::LINE_ATTACKS[64][4096];
 int Attacks::board_distance(int square_1, int square_2) {
     int row_dif, col_dif;
     row_dif = abs(square_2 / 8 - square_1 / 8);
-    col_dif = abs(square_2 % 8 - square_1 % 8);
+    col_dif = abs((square_2 & 7) - (square_1 & 7));
     return max(row_dif, col_dif);
 } 
 void Attacks::init_bb_values() {
@@ -100,7 +100,7 @@ inline U64 Attacks::get_blockers(int index, int bits, U64 mask) {
 //Used to cut off edges of the board which are not needed in diag or line masks
 inline U64 Attacks::get_edges(int square)  {
   U64 square_rank = RANKS_BB[(int)(square/8)];
-  U64 square_file = FILES_BB[(square%8)];
+  U64 square_file = FILES_BB[(square & 7)];
   
   return ((RANKS_BB[0] & ~square_rank) | (RANKS_BB[7] & ~square_rank) | (FILES_BB[0] & ~square_file) | (FILES_BB[7] & ~square_file));
 }

@@ -1,26 +1,37 @@
 
 
-intellect: main.o board.o attacks.o movegen.o move.o engine.o eval.o sort.o uci.o
-	g++ -O3 -osortspeed -g main.o board.o attacks.o movegen.o move.o engine.o eval.o sort.o uci.o -o intellect
-main.o: main.cpp
-	g++ -c -g main.cpp
-board.o: board.cpp board.hpp zobrist.hpp
-	g++ -c -g board.cpp
-attacks.o: attacks.cpp attacks.hpp
-	g++ -c -g attacks.cpp
-movegen.o: movegen.cpp 
-	g++ -c -g movegen.cpp
-move.o: move.cpp
-	g++ -c -g move.cpp
-engine.o: engine.cpp engine.hpp
-	g++ -c -g engine.cpp
-eval.o: eval.cpp eval.hpp
-	g++ -c -g eval.cpp
-sort.o: sort.cpp 
-	g++ -c -g sort.cpp
-uci.o: uci.cpp uci.hpp
-	g++ -c -g uci.cpp
+CC = g++
+PROF=-pg
+CFLAGS = -O3 -march=native
+ODIR = bin
+SDIR = src
+TOOLDIR = tools
+OFILES = board.o attacks.o engine.o eval.o move.o movegen.o sort.o uci.o misc.o main.o 
+RM = del
+
+
+SOURCES = $(wildcard *.cpp */*.cpp */*/*.cpp)
+HEADERS = $(wildcard *.hpp */*.hpp */*/*.hpp)
+OBJECTS = $(addprefix $(ODIR)/, $(OFILES))
+#OBJECTS += $(TOOLDIR)/misc.o
+#HEADERS = $(addprefix $(SDIR)/, $(HFILES))
+
+TARGET = intellect
+TESTING_TARGET = intellect_test
+all: $(TARGET)
+
+$(TARGET): $(OBJECTS)
+	$(CC) $(CFLAGS) $(OBJECTS) -o $(TARGET) 
+	
+$(TESTING_TARGET): $(OBJECTS)
+	$(CC) $(CFLAGS) $(OBJECTS) -o $(TESTING_TARGET) 
+
+$(ODIR)/%.o : $(SDIR)/%.cpp
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(ODIR)/%.o : $(SDIR)/$(TOOLDIR)/%.cpp
+	$(CC) $(CFLAGS) -c $< -o $@
+
 
 clean:
-	del *.o 
-	del intellect.exe
+	$(RM) $(ODIR)\*.o
