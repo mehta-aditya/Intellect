@@ -67,3 +67,25 @@ int Engine::evaluation(Board &board){
     value = ((mg_value[WHITE]-mg_value[BLACK]) * phase + (eg_value[WHITE]-eg_value[BLACK]) * (256-phase))/256;
     return (board.turn == WHITE) ? value : -value;
 }
+
+//checks for most common cases of insufficient material
+bool Engine::is_insufficient(Board &board) {
+    U64 no_kings = (board.piece_co[WHITE] & ~board.piece_boards[WHITE][KING_I]) |
+                    (board.piece_co[BLACK] & ~board.piece_boards[BLACK][KING_I]);
+    
+    //NK v K
+    if (!(no_kings & ~board.piece_boards[WHITE][KNIGHT_I])) {
+        return true;
+    }   
+    else if (!(no_kings & ~board.piece_boards[BLACK][KNIGHT_I])) {
+        return true;
+    }  
+    //BK v K
+    else if (!(no_kings & ~board.piece_boards[BLACK][BISHOP_I])) {
+        return true;
+    }  
+    else if (!(no_kings & ~board.piece_boards[BLACK][BISHOP_I])) {
+        return true;
+    }  
+    return false;
+}

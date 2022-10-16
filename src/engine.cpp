@@ -93,6 +93,7 @@ inline int Engine::quiesce(Board &board, int alpha, int beta, int depth = QUIESC
                 break;
             }
             if (value > alpha) {
+                flag = TT_EXACT;
                 alpha = value;
             }
         }        
@@ -120,8 +121,10 @@ inline int Engine::negamax(Board &board, int alpha, int beta, int depth, int ply
     
     pv_len[ply] = ply;
 
-    //Check for draw (threefold repition and 50 move)
-    if (ply && (board.is_repetition() | (board.halfmove_clock >= 100 && !(in_check)))) {return DRAW_V;}
+    //Check for draw (threefold repition, 50 move and insufficient material)
+    if (board.is_repetition() || is_insufficient(board) || (board.halfmove_clock >= 100 && !(in_check))) {
+        return DRAW_V;
+    }
 
     //search extension for being in check
     if (in_check) {depth++;}
@@ -317,13 +320,12 @@ inline void Engine::iterative_deepening(Board& board) {
     int alpha = -MAX_V, beta = MAX_V;
     int value = 0;
     int upperbound, lowerbound;
-    int delta_v = 20;
+    int delta_v = 10;
     for (int depth = 1; depth <= search_depth; depth++) {       
         //check engine limits
         if (check_limits(depth)) {break;}
-        //value = negamax(board, alpha, beta, depth);
         //use aspiration windows
-        if (depth <= 4) {
+        if (depth <= 6) {
            value = negamax(board, alpha, beta, depth);
         }
         else {
@@ -342,7 +344,7 @@ inline void Engine::iterative_deepening(Board& board) {
                 }
                 else {break;}
                 //increase the window if we were outside alpha and beta
-                delta_v += delta_v/3;
+                delta_v += delta_v/2;
             }
         }
 
@@ -352,8 +354,8 @@ inline void Engine::iterative_deepening(Board& board) {
 
         //print uci info
         cout << "info";
-        if (value < -MATE_V+MAX_DEPTH+1) {cout << " score mate " << (int)((-MATE_V-value+1)/2);}
-        else if (value > MATE_V-MAX_DEPTH-1) {cout << " score mate " << (int)((MATE_V-value+1)/2);}
+        if (value < -MATE_V+MAX_DEPTH+1) {cout << " score mate " << (int)((-MATE_V-value)/2);}
+        else if (value > MATE_V-MAX_DEPTH-1) {cout << " score mate " << (int)((MATE_V-value)/2);}
         else {cout << " score cp " << value;}
         cout << " depth " << depth;
         cout << " time " << elapsed_time;

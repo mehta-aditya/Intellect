@@ -119,7 +119,8 @@ class Engine{
         time_point<steady_clock> start_time;
         
         //eval.cpp
-        static int evaluation(Board &board);
+        int evaluation(Board &board);
+        bool is_insufficient(Board &board);
 
         //sort.cpp
         void score_moves(Board &board, vector<Moves> &moves, Moves tt_move, int ply);
