@@ -136,13 +136,15 @@ inline int Engine::negamax(Board &board, int alpha, int beta, int depth, int ply
 
     bool is_tt = tt_table.find(board.zobrist_hash) != tt_table.end(); //checks if the position is in the transposition table
     //check transposition table if the position has appeared before
+    TTEntry tt_entry;
     if(is_tt) {
-        if(ply && tt_table[board.zobrist_hash].depth >= depth && !is_pv) {   
-            if(tt_table[board.zobrist_hash].flag == TT_EXACT) {return tt_table[board.zobrist_hash].value;}
-            else if (tt_table[board.zobrist_hash].flag == TT_ALPHA && tt_table[board.zobrist_hash].value <= alpha) {return tt_table[board.zobrist_hash].value;}
-            else if (tt_table[board.zobrist_hash].flag == TT_BETA && tt_table[board.zobrist_hash].value >= beta) {return tt_table[board.zobrist_hash].value;}   
+        tt_entry = tt_table[board.zobrist_hash];
+        if(ply && tt_entry.depth >= depth && !is_pv) {   
+            if(tt_entry.flag == TT_EXACT) {return tt_entry.value;}
+            else if (tt_entry.flag == TT_ALPHA && tt_entry.value <= alpha) {return tt_entry.value;}
+            else if (tt_entry.flag == TT_BETA && tt_entry.value >= beta) {return tt_entry.value;}   
         }
-        tt_move = tt_table[board.zobrist_hash].move;
+        tt_move = tt_entry.move;
     }   
 
     //IID reduction technique
@@ -152,7 +154,7 @@ inline int Engine::negamax(Board &board, int alpha, int beta, int depth, int ply
     //static evaluation of position
     //use transposition table eval if it's available
     int eval;
-    if (is_tt && !in_check) {eval = tt_table[board.zobrist_hash].value;}
+    if (is_tt && !in_check) {eval = tt_entry.value;}
     else {
         eval = evaluation(board);
     }
@@ -196,10 +198,9 @@ inline int Engine::negamax(Board &board, int alpha, int beta, int depth, int ply
     for (Moves &move : moves) {
         //check if a move is tactical or related to checks
         not_tactical = move.captured == NO_PIECE && !in_check && move.promoted == PAWN_I;
-
         // late move pruning (LMP) 
         // we can prune moves that are late in the node cause they are probably not as good
-        if (depth <= 7 && not_tactical && !is_pv && legal_moves > LMP_TABLE[depth]) {
+        if (depth <= 7 && !is_pv && not_tactical && legal_moves > LMP_TABLE[depth]) {
             continue;
         }
 
@@ -218,7 +219,7 @@ inline int Engine::negamax(Board &board, int alpha, int beta, int depth, int ply
         //if legal increase legal move count
         legal_moves++;  
 
-        R = 0;
+        R = 0; //Reduction
         //use late move reduction (LMR)
         //Reduces search depth for moves that are late in the node
         if (depth >= 3 && legal_moves >= 3 && not_tactical) {
@@ -229,7 +230,6 @@ inline int Engine::negamax(Board &board, int alpha, int beta, int depth, int ply
         }
         //keep reductions within proper bounds
         R = max(min(R, depth-1), 0);
-
 
         //zero window
         if (legal_moves > 1 || !is_pv) {  
@@ -269,7 +269,9 @@ inline int Engine::negamax(Board &board, int alpha, int beta, int depth, int ply
                     countermoves[move.from_square][move.to_square] = move;
                     history[board.turn][move.piece][move.to_square] += depth*depth;
                     //don't go over maximum
-                    if (history[board.turn][move.piece][move.to_square] > MAX_HISTORY_V) {history[board.turn][move.piece][move.to_square] /= 2;}
+                    if (history[board.turn][move.piece][move.to_square] > MAX_HISTORY_V) {
+                        history[board.turn][move.piece][move.to_square] /= 2;
+                    }
                 }
                 break; //cutoff
             }
@@ -283,7 +285,9 @@ inline int Engine::negamax(Board &board, int alpha, int beta, int depth, int ply
                 if (move.captured == NO_PIECE) {
                     history[board.turn][move.piece][move.to_square] += depth*depth;
                     //don't go over maximum
-                    if (history[board.turn][move.piece][move.to_square] > MAX_HISTORY_V) {history[board.turn][move.piece][move.to_square] /= 2;}
+                    if (history[board.turn][move.piece][move.to_square] > MAX_HISTORY_V) {
+                        history[board.turn][move.piece][move.to_square] /= 2;
+                    }
                 }
             }
             //decrease history heuristic
