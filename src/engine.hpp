@@ -124,7 +124,7 @@ class Engine{
 
         //sort.cpp
         void score_moves(Board &board, vector<Moves> &moves, Moves tt_move, int ply);
-        void score_quiesce_moves(vector<Moves> &moves, Moves tt_move);  
+        void score_quiesce_moves(Board &board, vector<Moves> &moves, Moves tt_move);  
         bool see(Board &board, Moves move, int threshold);
 
         inline void halt() {

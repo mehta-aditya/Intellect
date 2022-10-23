@@ -67,7 +67,7 @@ inline int Engine::quiesce(Board &board, int alpha, int beta, int depth = QUIESC
     vector<Moves> moves;
     moves.reserve(MOVE_LIST_RESERVE);
     board.generate_piece_captures(moves);
-    score_quiesce_moves(moves, tt_move);
+    score_quiesce_moves(board, moves, tt_move);
     sort(moves.begin(), moves.end(), move_sort());
     //run through capture moves
     for (Moves &move : moves) {

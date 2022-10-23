@@ -26,23 +26,23 @@ void Engine::score_moves(Board &board, vector<Moves> &moves, Moves tt_move, int 
     for (Moves &move : moves) {
         if (move == pv[0][ply]) {move.order = PV_O;}
         else if (move == tt_move) {move.order = TT_O;}
-        else if (move.flag == CAPTURE_F || move.flag == EN_PASSANT_F) {move.order = CAPTURE_O + MVV_LVA_TABLE[move.captured][move.piece] - (!see(board, move, 0))*SEE_O;}
+        else if (move.flag == CAPTURE_F || move.flag == EN_PASSANT_F) {move.order = CAPTURE_O + MVV_LVA_TABLE[board.piece_at(move.to_square, board.turn^1)][move.piece] - (!see(board, move, 0))*SEE_O;}
         else if (move == killers[0][ply]) {move.order = KILLER_O;}
         else if (move == killers[1][ply]) {move.order = KILLER_O/2;}
         else if (move.flag == NO_FLAG || move.flag == DOUBLE_PAWN_F) {move.order = history[board.turn][move.piece][move.to_square];}
         else if (move.flag == PROMOTE_F) {move.order = PROMOTION_O + PIECE_VALUES[move.promoted];}
-        else if (move.flag == PROMOTE_CAP_F) {move.order = PROMOTION_O + PIECE_VALUES[move.promoted] + MVV_LVA_TABLE[move.captured][move.piece];}
+        else if (move.flag == PROMOTE_CAP_F) {move.order = PROMOTION_O + PIECE_VALUES[move.promoted] + MVV_LVA_TABLE[board.piece_at(move.to_square, board.turn^1)][move.piece];}
         //give countermove bonus
         if (countermoves[move.from_square][move.to_square] == move) {move.order += COUNTERMOVE_O;}
     }
 }
 
 //score moves for quiesce movegen
-void Engine::score_quiesce_moves(vector<Moves> &moves, Moves tt_move) {
+void Engine::score_quiesce_moves(Board &board, vector<Moves> &moves, Moves tt_move) {
     for (Moves &move : moves) {
         if (move == tt_move) {move.order = TT_O;}
-        else if (move.flag == CAPTURE_F || move.flag == EN_PASSANT_F) {move.order = CAPTURE_O + MVV_LVA_TABLE[move.captured][move.piece];}
-        else if (move.flag == PROMOTE_CAP_F) {move.order = PROMOTION_O + PIECE_VALUES[move.promoted] + MVV_LVA_TABLE[move.captured][move.piece];}
+        else if (move.flag == CAPTURE_F || move.flag == EN_PASSANT_F) {move.order = CAPTURE_O + MVV_LVA_TABLE[board.piece_at(move.to_square, board.turn^1)][move.piece];}
+        else if (move.flag == PROMOTE_CAP_F) {move.order = PROMOTION_O + PIECE_VALUES[move.promoted] + MVV_LVA_TABLE[board.piece_at(move.to_square, board.turn^1)][move.piece];}
     }
 }
 
