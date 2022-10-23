@@ -1,6 +1,6 @@
 #include "attacks.hpp"
 
-const int CASTLING_SQUARES[2][2][3] = {{{60, 61, 62}, {60, 59, 58}}, {{4, 5, 6}, {4, 3, 2}}};
+constexpr int CASTLING_SQUARES[2][2][3] = {{{60, 61, 62}, {60, 59, 58}}, {{4, 5, 6}, {4, 3, 2}}};
 //Check if the square is attacked (useful for checking for checks)
 bool Board::is_square_attacked(int square, int color) {
   U64 attack_board;

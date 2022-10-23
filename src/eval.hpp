@@ -1,24 +1,24 @@
 
 #ifndef EVAL_HPP
 #define EVAL_HPP
-const int PIECE_VALUES[6] = {100, 300, 300, 500, 900, 20000};
-const int PHASE_VALUES[6] = {0, 1, 1, 2, 5, 0};
-const int MAX_PHASE = 26;
+constexpr int PIECE_VALUES[6] = {100, 300, 300, 500, 900, 20000};
+constexpr int PHASE_VALUES[6] = {0, 1, 1, 2, 5, 0};
+constexpr int MAX_PHASE = 26;
 
 //Mobility
-const int MG_MOBILITY[6] = {0, 1, 3, 5, 1, 0};
-const int EG_MOBILITY[6] = {0, 2, 2, 2, 8, 4};
-const int MAX_PIECE_BITS[6] = {4, 8, 13, 14, 27, 8};
+constexpr int MG_MOBILITY[6] = {0, 1, 3, 5, 1, 0};
+constexpr int EG_MOBILITY[6] = {0, 2, 2, 2, 8, 4};
+constexpr int MAX_PIECE_BITS[6] = {4, 8, 13, 14, 27, 8};
 
-const int PASSED_VALUE[8] = {0, 38, 26, 20, 15, 5, 2, 0, }; //From white point of view
-const int EG_PASSED_BONUS = 5;
+constexpr int PASSED_VALUE[8] = {0, 38, 26, 20, 15, 5, 2, 0, }; //From white point of view
+constexpr int EG_PASSED_BONUS = 5;
 
-const int MG_PIECE_VALUES[6] = {96, 312, 330, 530, 999, 20000, };
-const int EG_PIECE_VALUES[6] = {105, 308, 335, 540, 992, 20000, };
+constexpr int MG_PIECE_VALUES[6] = {96, 312, 330, 530, 999, 20000, };
+constexpr int EG_PIECE_VALUES[6] = {105, 308, 335, 540, 992, 20000, };
 
 
 //middle game and opening pst
-const int MG_PST_VALUES[6][64] = 
+constexpr int MG_PST_VALUES[6][64] = 
 {
 {
 0, 0, 0, 0, 0, 0, 0, 0,
@@ -83,7 +83,7 @@ const int MG_PST_VALUES[6][64] =
 };
 
 //endgame pst table
-const int EG_PST_VALUES[6][64] =
+constexpr int EG_PST_VALUES[6][64] =
 {
 {
 0, 0, 0, 0, 0, 0, 0, 0,
@@ -147,7 +147,7 @@ const int EG_PST_VALUES[6][64] =
 },
 };
 
-const int flip_board[2][64] = {
+constexpr int flip_board[2][64] = {
 {
 		0, 1, 2, 3, 4, 5, 6, 7,
 		8, 9, 10, 11, 12, 13, 14, 15,

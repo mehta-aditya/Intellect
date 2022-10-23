@@ -12,7 +12,7 @@ enum ORDER {
     SEE_O = 3000 //not a bonus as this is subtracted is SEE is negative
 };
 //table used to compute move ordering for captures
-const int MVV_LVA_TABLE[6][6] = {
+constexpr int MVV_LVA_TABLE[6][6] = {
     {15, 14, 13, 12, 11, 10},  //victim P, attacker P, N, B, R, Q, K
     {25, 24, 23, 22, 21, 20},  //victim N, attacker P, N, B, R, Q, K
     {35, 34, 33, 32, 31, 30},  //victim B, attacker P, N, B, R, Q, K
