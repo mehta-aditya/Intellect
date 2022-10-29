@@ -42,9 +42,15 @@ int Engine::evaluation(Board &board){
             while (piece_board) {
                 square = pop_lsb(&piece_board);
                 //mobility value
-                mobility_squares = board.moves_at(square, c, p);
-                mg_value[c] += (mobility_squares-MAX_PIECE_BITS[p]/2)*MG_MOBILITY[p];
-                eg_value[c] += (mobility_squares-MAX_PIECE_BITS[p]/2)*EG_MOBILITY[p];   
+                if (p != PAWN_I && p != KING_I) {
+                    // mg_value[c] += (mobility_squares-MAX_PIECE_BITS[p]/2)*MG_MOBILITY[p];
+                    // eg_value[c] += (mobility_squares-MAX_PIECE_BITS[p]/2)*EG_MOBILITY[p];  
+                    mobility_squares = board.moves_at(square, c, p);
+                    mg_value[c] += (mobility_squares)*MOBILITY[p];
+                    eg_value[c] += (mobility_squares)*MOBILITY[p];
+                    game_phase += PHASE_VALUES[p];
+                } 
+  
                 //material value
                 mg_value[c] += MG_PIECE_VALUES[p];
                 eg_value[c] += EG_PIECE_VALUES[p];
@@ -52,7 +58,7 @@ int Engine::evaluation(Board &board){
                 //positional value
                 mg_value[c] += MG_PST_VALUES[p][flip_board[c][square]];
                 eg_value[c] += EG_PST_VALUES[p][flip_board[c][square]];        
-                game_phase += PHASE_VALUES[p];
+                
                 //passed pawn eval
                 if (p == PAWN_I && !(PASSED_MASK[c][square] & board.piece_boards[c^1][PAWN_I])) {
                     int rank = flip_board[c][square]/8;

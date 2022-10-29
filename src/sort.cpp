@@ -9,7 +9,7 @@ enum ORDER {
     COUNTERMOVE_O = 100,
     TT_O = 5000,
     PV_O = 6000,
-    SEE_O = 3000 //not a bonus as this is subtracted is SEE is negative
+    SEE_O = 2000 //not a bonus as this is subtracted if SEE is negative
 };
 //table used to compute move ordering for captures
 constexpr int MVV_LVA_TABLE[6][6] = {

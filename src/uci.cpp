@@ -15,7 +15,6 @@ int UCI::perft(int depth){
     if (!board.in_check(board.turn^1)) {
         nodes += perft(depth - 1);
     }
-    nodes += perft(depth - 1);
     board.pop();
   }
   return nodes;

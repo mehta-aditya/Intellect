@@ -2,7 +2,7 @@
 
 CC = g++
 PROF=-pg
-CFLAGS = -O3 -march=native
+CFLAGS = -Ofast -march=native
 ODIR = bin
 SDIR = src
 TOOLDIR = tools

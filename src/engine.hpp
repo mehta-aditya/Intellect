@@ -9,19 +9,19 @@
 using TTFLAG = uint_fast8_t;
 
 //Key Engine Parameters
-const int MAX_DEPTH = 64;
-const int MAX_TIME = 300000000;
-const int TIME_DIVIDER = 35;
-const int OVERHEAD_TIME = 25;
-const int DEFUALT_TT_MB = 128;
-const int QUIESCE_MAX_DEPTH = 10;
+constexpr int MAX_DEPTH = 64;
+constexpr int MAX_TIME = 300000000;
+constexpr int TIME_DIVIDER = 35;
+constexpr int OVERHEAD_TIME = 25;
+constexpr int DEFUALT_TT_MB = 128;
+constexpr int QUIESCE_MAX_DEPTH = 20;
 //Values for different pruning and reduction methods
-const int REVERSE_FUTILITY_MARGIN = 80;
-const int RAZORING_MARGIN = 200;
-const int DELTA_MARGIN = 1000;
-const int LMP_TABLE[8] = {0, 8, 10, 12, 15, 20, 22, 24}; //lmp move cutoff
-const int FUTILITY_MARGIN[8] = {0, 300, 450, 600, 750, 900, 1050, 1200}; //futility margin
-const int MAX_HISTORY_V = 3000; //based on move ordering values
+constexpr int REVERSE_FUTILITY_MARGIN = 80;
+constexpr int RAZORING_MARGIN = 200;
+constexpr int DELTA_MARGIN = 1000;
+constexpr int LMP_TABLE[8] = {0, 8, 10, 12, 15, 20, 22, 24}; //lmp move cutoff
+constexpr int FUTILITY_MARGIN[8] = {0, 300, 450, 600, 750, 900, 1050, 1200}; //futility margin
+constexpr int MAX_HISTORY_V = 3000; //based on move ordering values
 
 //Values used in engine eval
 enum VALUES : int {
@@ -101,7 +101,7 @@ class Engine{
             TT_MAX_SIZE = set_tt_memory(tt_table, DEFUALT_TT_MB);
             for (int d = 0; d < MAX_DEPTH; d++) {
                 for (int m = 0; m < 64; m++) {
-                    LMR_TABLE[d][m] = max(d/5, 2) + m/10;
+                    LMR_TABLE[d][m] = max(d/4, 2) + m/10;
                 }
             }
         }

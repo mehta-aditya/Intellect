@@ -8,6 +8,7 @@ constexpr int MAX_PHASE = 26;
 //Mobility
 constexpr int MG_MOBILITY[6] = {0, 1, 3, 5, 1, 0};
 constexpr int EG_MOBILITY[6] = {0, 2, 2, 2, 8, 4};
+constexpr int MOBILITY[6] = {0, 4, 4, 2, 1, 0};
 constexpr int MAX_PIECE_BITS[6] = {4, 8, 13, 14, 27, 8};
 
 constexpr int PASSED_VALUE[8] = {0, 38, 26, 20, 15, 5, 2, 0, }; //From white point of view
