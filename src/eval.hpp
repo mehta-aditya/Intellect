@@ -6,8 +6,8 @@ constexpr int PHASE_VALUES[6] = {0, 1, 1, 2, 5, 0};
 constexpr int MAX_PHASE = 26;
 
 //Mobility
-constexpr int MG_MOBILITY[6] = {0, 1, 3, 5, 1, 0};
-constexpr int EG_MOBILITY[6] = {0, 2, 2, 2, 8, 4};
+constexpr int MG_MOBILITY[6] = {0, 4, 4, 2, 1, 0};
+constexpr int EG_MOBILITY[6] = {0, 2, 2, 2, 2, 0};
 constexpr int MOBILITY[6] = {0, 4, 4, 2, 1, 0};
 constexpr int MAX_PIECE_BITS[6] = {4, 8, 13, 14, 27, 8};
 

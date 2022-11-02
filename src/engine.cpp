@@ -171,7 +171,7 @@ inline int Engine::negamax(Board &board, int alpha, int beta, int depth, int ply
     //if we don't play a move but still have a good position we can prune
     // *add methods to stop zugzwang 
     int R;
-    if (null && !in_check && depth >= 3 && eval >= beta && !is_pv) {
+    if (null && !in_check && depth >= 3 && !is_pv) {
         R = 3 + (depth/6);
         board.push_null();
         value = -negamax(board, -beta, -beta+1, depth-R-1, ply+1, false);
@@ -200,7 +200,7 @@ inline int Engine::negamax(Board &board, int alpha, int beta, int depth, int ply
         not_tactical = move.captured == NO_PIECE && !in_check && move.promoted == PAWN_I;
         // late move pruning (LMP) 
         // we can prune moves that are late in the node cause they are probably not as good
-        if (depth <= 4 && !is_pv && not_tactical && legal_moves > LMP_TABLE[depth]) {
+        if (depth <= 7 && !is_pv && not_tactical && legal_moves > LMP_TABLE[depth]) {
             continue;
         }
 
@@ -225,7 +225,8 @@ inline int Engine::negamax(Board &board, int alpha, int beta, int depth, int ply
         if (depth >= 3 && legal_moves > 3 && not_tactical && !is_pv) {
             R = LMR_TABLE[depth][legal_moves];
             //don't reduce as much if PV, has good history or is tactical
-            //R -= history[board.turn][move.piece][move.to_square]/1000;
+            R -= is_pv;
+            R -= history[board.turn][move.piece][move.to_square]/1000;
         }
         //keep reductions within proper bounds
         R = max(min(R, depth-1), 0);

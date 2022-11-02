@@ -46,8 +46,8 @@ int Engine::evaluation(Board &board){
                     // mg_value[c] += (mobility_squares-MAX_PIECE_BITS[p]/2)*MG_MOBILITY[p];
                     // eg_value[c] += (mobility_squares-MAX_PIECE_BITS[p]/2)*EG_MOBILITY[p];  
                     mobility_squares = board.moves_at(square, c, p);
-                    mg_value[c] += (mobility_squares)*MOBILITY[p];
-                    eg_value[c] += (mobility_squares)*MOBILITY[p];
+                    mg_value[c] += mobility_squares*MG_MOBILITY[p];
+                    eg_value[c] += mobility_squares*EG_MOBILITY[p];
                     game_phase += PHASE_VALUES[p];
                 } 
   
