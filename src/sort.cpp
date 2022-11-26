@@ -6,10 +6,10 @@ enum ORDER {
     CAPTURE_O = 4000,
     PROMOTION_O = 3500,
     KILLER_O = 3500, 
-    COUNTERMOVE_O = 100,
+    COUNTERMOVE_O = 200,
     TT_O = 5000,
     PV_O = 6000,
-    SEE_O = 2000 //not a bonus as this is subtracted if SEE is negative
+    SEE_O = 1000 //not a bonus as this is subtracted if SEE is negative
 };
 //table used to compute move ordering for captures
 constexpr int MVV_LVA_TABLE[6][6] = {
@@ -26,14 +26,16 @@ void Engine::score_moves(Board &board, vector<Moves> &moves, Moves tt_move, int 
     for (Moves &move : moves) {
         if (move == pv[0][ply]) {move.order = PV_O;}
         else if (move == tt_move) {move.order = TT_O;}
-        else if (move.flag == CAPTURE_F || move.flag == EN_PASSANT_F) {move.order = CAPTURE_O + MVV_LVA_TABLE[board.piece_at(move.to_square, board.turn^1)][move.piece] - (!see(board, move, 0))*SEE_O;}
+        else if (move.flag == CAPTURE_F || move.flag == EN_PASSANT_F) {move.order = CAPTURE_O + MVV_LVA_TABLE[board.piece_at(move.to_square, board.turn^1)][move.piece];}
         else if (move == killers[0][ply]) {move.order = KILLER_O;}
-        else if (move == killers[1][ply]) {move.order = KILLER_O/2;}
-        else if (move.flag == NO_FLAG || move.flag == DOUBLE_PAWN_F) {move.order = history[board.turn][move.piece][move.to_square];}
-        else if (move.flag == PROMOTE_F) {move.order = PROMOTION_O + PIECE_VALUES[move.promoted];}
-        else if (move.flag == PROMOTE_CAP_F) {move.order = PROMOTION_O + PIECE_VALUES[move.promoted] + MVV_LVA_TABLE[board.piece_at(move.to_square, board.turn^1)][move.piece];}
-        //give countermove bonus
-        if (countermoves[move.from_square][move.to_square] == move) {move.order += COUNTERMOVE_O;}
+        else if (move == killers[1][ply]) {move.order = KILLER_O-1;}
+        else {
+            if (move.flag == NO_FLAG || move.flag == DOUBLE_PAWN_F) {move.order = history[board.turn][move.piece][move.to_square];}
+            else if (move.flag == PROMOTE_F) {move.order = PROMOTION_O + PIECE_VALUES[move.promoted];}
+            else if (move.flag == PROMOTE_CAP_F) {move.order = PROMOTION_O + PIECE_VALUES[move.promoted] + MVV_LVA_TABLE[board.piece_at(move.to_square, board.turn^1)][move.piece];}
+            //give countermove bonus
+            if (countermoves[board.turn][move.from_square][move.to_square] == move) {move.order += COUNTERMOVE_O;}   
+        }
     }
 }
 
@@ -50,7 +52,7 @@ void Engine::score_quiesce_moves(Board &board, vector<Moves> &moves, Moves tt_mo
 //used to prune captures in quiesce search
 bool Engine::see(Board &board, Moves move, int threshold){
     int color = board.turn^1;
-    int value = PIECE_VALUES[board.piece_at(move.to_square, color)];
+    int value = PIECE_VALUES[board.piece_list[color][move.to_square]];
     if (move.flag == PROMOTE_CAP_F) {value += PIECE_VALUES[move.promoted] - PIECE_VALUES[move.piece];}
     value -= threshold;
     if (value < 0) {return false;}

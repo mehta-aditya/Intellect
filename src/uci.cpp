@@ -76,7 +76,6 @@ void UCI::set_position(istringstream &is) {
     while (is >> cin_part) {
         board.push(to_move(cin_part));
     }
-    
 }
 //go command
 void UCI::go(istringstream &is) {
@@ -85,7 +84,6 @@ void UCI::go(istringstream &is) {
     int perft_depth = 0;
     while (is >> cin_part) {
         if (cin_part == "perft") {is >> perft_depth; break;}
-
         //only search these specific moves
         if (cin_part == "searchmoves") {
             while (is >> cin_part) {

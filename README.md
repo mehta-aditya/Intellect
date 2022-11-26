@@ -21,8 +21,8 @@ Not rated on CCRL as version 1 has not been published but this version would be 
 * Razoring
 * History Heuristics
 * MVV LVA Move Ordering
-* Late Move Pruning
-* Futility Pruning
+* Late Move Pruning (Disabled)
+* Futility Pruning (Disabled)
 * Late Move Reductions
 * Delta Pruning in Quiesce Search
 * SEE Pruning in Quiesce Search
@@ -32,6 +32,8 @@ Not rated on CCRL as version 1 has not been published but this version would be 
 * Middlegame and Endgame Piece Square Tables
 * Passed Pawn Bonus
 * Mobility
+* Basic Pawn Structure (Passed Pawns, Doubled Pawns, Isolated Pawns)
+* Basic King Safety
 
 ## Future Improvements
 There are still many improvements that I would like to make including: 

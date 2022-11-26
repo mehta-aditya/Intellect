@@ -1,11 +1,9 @@
-
-
-CC = g++
+CC = g++ 
 PROF=-pg
-CFLAGS = -Ofast -march=native
-ODIR = bin
-SDIR = src
-TOOLDIR = tools
+CFLAGS=-Ofast -march=native
+ODIR=bin
+SDIR=src
+TOOLDIR=tools
 OFILES = board.o attacks.o engine.o eval.o move.o movegen.o sort.o uci.o misc.o main.o 
 RM = del
 

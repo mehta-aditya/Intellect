@@ -137,6 +137,7 @@ class Board {
     //No Piece, WP, WN, WB, WR, WQ, WK, BP, BN, BB, BR, BQ, BK
     U64 piece_boards[2][6] = {EMPTY_BB};
     U64 piece_co[2] = {EMPTY_BB};
+    int piece_list[2][64]; //list of all pieces organized by color
     //key for zobrist hashing
     U64 zobrist_hash = EMPTY_BB;
 
@@ -150,7 +151,7 @@ class Board {
     //movegen.cpp
     bool is_square_attacked(int square, int color);
     U64 attackers_to(int square, int color, U64 blockers);
-    int moves_at(int square, int color, int piece);
+    U64 attackers_from(int square, int color, int piece);
 
     void generate_castling_moves(vector<Moves>& move_list);
     void generate_piece_quiets(vector<Moves>& move_list);

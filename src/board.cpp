@@ -33,6 +33,7 @@ void Board::set_fen(string fen_set){
             for (int m = PAWN_I; m <= KING_I; m++) {
               if (fen_list[i][j] == FEN_PIECE_STRINGS[l][m][0]){
                 SET_BIT(piece_boards[l][m], iter);
+                piece_list[l][iter] = m;
                 zobrist_hash ^= PIECE_ZOBRIST[l][m][iter];
                 break;
               }
@@ -144,6 +145,12 @@ void Board::reset(){
   memset(piece_boards, EMPTY_BB, sizeof(piece_boards[0][0]) * 2 * 6); 
   memset(piece_co, EMPTY_BB, sizeof(piece_co)); 
   zobrist_hash = EMPTY_BB;
+  for (int c = WHITE; c <= BLACK; c++) {
+    for (int s = 0; s < 64; s++) {
+      piece_list[c][s] = NO_PIECE;
+    }
+  }
+
 }
 
 //Show given bitboard
