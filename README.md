@@ -1,6 +1,6 @@
 # Intellect
 A UCI compliant C++ Chess Engine
-Not rated on CCRL as version 1 has not been published but this version would be around 2350 CCRL based on my testing. 
+Not rated on CCRL as version 1 has not been published but this version would be around 2150 CCRL based on my testing. 
 
 ## Features
 ### Board Representation
