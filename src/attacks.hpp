@@ -2,11 +2,11 @@
 #ifndef Attacks_HPP
 #define Attacks_HPP
 
-const U64 RANK_4 = 0x000000FF00000000ULL, RANK_5 = 0x00000000FF000000ULL;
-const U64 RANK_8 = 0xFF00000000000000ULL,RANK_1 = 0x00000000000000FFULL;
-const U64 FILE_A = 0x8080808080808080ULL, FILE_H = 0x0101010101010101ULL;
-const U64 CORNERS = 0x8100000000000081ULL;
-const U64 EDGES = RANK_1 | RANK_8 | FILE_A | FILE_H;
+constexpr U64 RANK_4 = 0x000000FF00000000ULL, RANK_5 = 0x00000000FF000000ULL;
+constexpr U64 RANK_8 = 0xFF00000000000000ULL,RANK_1 = 0x00000000000000FFULL;
+constexpr U64 FILE_A = 0x8080808080808080ULL, FILE_H = 0x0101010101010101ULL;
+constexpr U64 CORNERS = 0x8100000000000081ULL;
+constexpr U64 EDGES = RANK_1 | RANK_8 | FILE_A | FILE_H;
 
 namespace Attacks {
 const vector<int> KNIGHT_DELTAS = {17, 15, 10, 6, -17, -15, -10, -6};
@@ -52,7 +52,7 @@ inline int count_bits(U64 bitboard) {
 }
 
 // //Initilize the magics
-const U64 diag_magics[64] = {
+constexpr U64 diag_magics[64] = {
   18018831494946945ULL,
   1134767471886336ULL,
   2308095375972630592ULL,
@@ -119,7 +119,7 @@ const U64 diag_magics[64] = {
   580611413180448ULL
 };
 
-const U64 line_magics[64] {
+constexpr U64 line_magics[64] {
   11565248328107303040ULL,
   12123725398701785089ULL,
   900733188335206529ULL,
@@ -188,7 +188,7 @@ const U64 line_magics[64] {
 
 
 //Relevant bits which are important for getting attack boards
-const int diag_relevant_bits[64] = {
+constexpr int diag_relevant_bits[64] = {
   6, 5, 5, 5, 5, 5, 5, 6,
   5, 5, 5, 5, 5, 5, 5, 5,
   5, 5, 7, 7, 7, 7, 5, 5,
@@ -198,7 +198,7 @@ const int diag_relevant_bits[64] = {
   5, 5, 5, 5, 5, 5, 5, 5,
   6, 5, 5, 5, 5, 5, 5, 6};
 
-const int line_relevant_bits[64] = {
+constexpr int line_relevant_bits[64] = {
   12, 11, 11, 11, 11, 11, 11, 12,
   11, 10, 10, 10, 10, 10, 10, 11,
   11, 10, 10, 10, 10, 10, 10, 11,

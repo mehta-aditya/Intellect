@@ -39,8 +39,8 @@ enum FLAGS {
 
 extern U64 SQUARES_BB[64];
 extern U64 CASTLING_BB[2][2];
-const U64 EMPTY_BB = 0ULL;
-const U64 ALL_BB = 0xFFFFFFFFFFFFFFFFULL;
+constexpr U64 EMPTY_BB = 0ULL;
+constexpr U64 ALL_BB = 0xFFFFFFFFFFFFFFFFULL;
 
 //Useful arrays
 const string FEN_PIECE_STRINGS[2][6] = {{"P", "N", "B", "R", "Q", "K"}, {"p", "n", "b", "r", "q", "k"}};
@@ -54,7 +54,7 @@ const string SQUARES[64] = {"a8", "b8", "c8","d8","e8","f8","g8","h8",
                       "a1", "b1", "c1","d1","e1","f1","g1","h1"};
 
 const string UNICODE_PIECES[2][6] = {{"\u2654", "\u2655", "\u2656", "\u2657", "\u2658", "\u2659"}, {"\u265A", "\u265B", "\u265C", "\u265D", "\u265E", "\u265F"}};
-const int MOVE_LIST_RESERVE = 218;
+constexpr int MOVE_LIST_RESERVE = 218;
 
 //Structure for a move
 struct Moves {
@@ -137,6 +137,7 @@ class Board {
     //No Piece, WP, WN, WB, WR, WQ, WK, BP, BN, BB, BR, BQ, BK
     U64 piece_boards[2][6] = {EMPTY_BB};
     U64 piece_co[2] = {EMPTY_BB};
+    int piece_list[2][64]; //list of all pieces organized by color
     //key for zobrist hashing
     U64 zobrist_hash = EMPTY_BB;
 
@@ -150,7 +151,7 @@ class Board {
     //movegen.cpp
     bool is_square_attacked(int square, int color);
     U64 attackers_to(int square, int color, U64 blockers);
-    int moves_at(int square, int color, int piece);
+    U64 attackers_from(int square, int color, int piece);
 
     void generate_castling_moves(vector<Moves>& move_list);
     void generate_piece_quiets(vector<Moves>& move_list);

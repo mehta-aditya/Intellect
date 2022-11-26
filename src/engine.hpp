@@ -9,19 +9,19 @@
 using TTFLAG = uint_fast8_t;
 
 //Key Engine Parameters
-const int MAX_DEPTH = 64;
-const int MAX_TIME = 300000000;
-const int TIME_DIVIDER = 35;
-const int OVERHEAD_TIME = 25;
-const int DEFUALT_TT_MB = 128;
-const int QUIESCE_MAX_DEPTH = 10;
+constexpr int MAX_DEPTH = 64;
+constexpr int MAX_TIME = 300000000;
+constexpr int TIME_DIVIDER = 35;
+constexpr int OVERHEAD_TIME = 25;
+constexpr int DEFUALT_TT_MB = 128;
+constexpr int QUIESCE_MAX_DEPTH = 10;
 //Values for different pruning and reduction methods
-const int REVERSE_FUTILITY_MARGIN = 80;
-const int RAZORING_MARGIN = 200;
-const int DELTA_MARGIN = 1000;
-const int LMP_TABLE[8] = {0, 8, 10, 12, 15, 20, 22, 24}; //lmp move cutoff
-const int FUTILITY_MARGIN[8] = {0, 300, 450, 600, 750, 900, 1050, 1200}; //futility margin
-const int MAX_HISTORY_V = 3000; //based on move ordering values
+constexpr int REVERSE_FUTILITY_MARGIN = 80;
+constexpr int RAZORING_MARGIN = 200;
+constexpr int DELTA_MARGIN = 1000;
+constexpr int LMP_TABLE[7] = {0, 8, 10, 12, 15, 20, 22}; //lmp move cutoff
+constexpr int FUTILITY_MARGIN[6] = {0, 100, 150, 300, 450, 600}; //futility margin
+constexpr int MAX_HISTORY_V = 2000; //based on move ordering values
 
 //Values used in engine eval
 enum VALUES : int {
@@ -87,7 +87,7 @@ class Engine{
         Moves pv[MAX_DEPTH+1][MAX_DEPTH+1];
         //various heuristic tables and pruning
         Moves killers[2][MAX_DEPTH];
-        Moves countermoves[64][64];
+        Moves countermoves[2][64][64];
         int history[2][6][64]; //[turn][piece][to]
         int LMR_TABLE[MAX_DEPTH][64];
 
@@ -136,6 +136,8 @@ class Engine{
             memset(killers, 0, sizeof(killers));
             memset(countermoves, 0, sizeof(countermoves));
             memset(history, 0, sizeof(history));
+            memset(pv, 0, sizeof(pv));
+            memset(pv_len, 0, sizeof(pv_len));
         }
 };
 

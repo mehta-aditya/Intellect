@@ -17,6 +17,7 @@ inline void Board::add_piece(int square, int color, int type) {
     piece_boards[color][type] |= mask;
     piece_co[color] |= mask;
     zobrist_hash ^= PIECE_ZOBRIST[color][type][square];
+    piece_list[color][square] = type;
 }
 //removing the piece from the bitboards
 inline void Board::remove_piece(int square, int color, int type) {
@@ -24,6 +25,7 @@ inline void Board::remove_piece(int square, int color, int type) {
     piece_boards[color][type] ^= mask;
     piece_co[color] ^= mask;
     zobrist_hash ^= PIECE_ZOBRIST[color][type][square];
+    piece_list[color][square] = NO_PIECE;
 }
 //move the piece in the bitboards
 inline void Board::move_piece(int from, int to, int color, int type) {
@@ -32,6 +34,8 @@ inline void Board::move_piece(int from, int to, int color, int type) {
     piece_co[color] ^= mask;
     zobrist_hash ^= PIECE_ZOBRIST[color][type][from];
     zobrist_hash ^= PIECE_ZOBRIST[color][type][to];
+    piece_list[color][from] = NO_PIECE;
+    piece_list[color][to] = type;
 }
 
 //add the piece to the bitboards
@@ -39,18 +43,22 @@ inline void Board::nz_add_piece(int square, int color, int type) {
     U64 mask = SQUARES_BB[square];
     piece_boards[color][type] |= mask;
     piece_co[color] |= mask;
+    piece_list[color][square] = type;
 }
 //removing the piece from the bitboards
 inline void Board::nz_remove_piece(int square, int color, int type) {
     U64 mask = SQUARES_BB[square];
     piece_boards[color][type] ^= mask;
     piece_co[color] ^= mask;
+    piece_list[color][square] = NO_PIECE;
 }
 //move the piece in the bitboards
 inline void Board::nz_move_piece(int from, int to, int color, int type) {
     U64 mask = SQUARES_BB[from] | SQUARES_BB[to];
     piece_boards[color][type] ^= mask;
     piece_co[color] ^= mask;
+    piece_list[color][from] = NO_PIECE;
+    piece_list[color][to] = type;
 }
 
 //play the move
@@ -72,7 +80,7 @@ void Board::push(Moves move){
         
         //Capture flag
         case CAPTURE_F:
-            move.captured = piece_at(move.to_square, opp_col);
+            move.captured = piece_list[opp_col][move.to_square];
             remove_piece(move.to_square, opp_col, move.captured);
             move_piece(move.from_square, move.to_square, turn, move.piece);
             break;
@@ -85,7 +93,7 @@ void Board::push(Moves move){
         
         //Promote (with capture) flag
         case PROMOTE_CAP_F:
-            move.captured = piece_at(move.to_square, opp_col);
+            move.captured = piece_list[opp_col][move.to_square];
             remove_piece(move.to_square, opp_col, move.captured);
             remove_piece(move.from_square, turn, move.piece);
             add_piece(move.to_square, turn, move.promoted);

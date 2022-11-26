@@ -5,149 +5,173 @@
 int MG_MOBILITY[6] = {0, 1, 3, 5, 1, 0};
 int EG_MOBILITY[6] = {0, 2, 2, 2, 8, 4};
 int MAX_PIECE_BITS[6] = {4, 8, 13, 14, 27, 8};
+int MG_DOUBLED_VALUE = -20;
+int EG_DOUBLED_VALUE = -3;
+int MG_ISOLATED_VALUE = 29;
+int EG_ISOLATED_VALUE = 20;
 
-int PASSED_VALUE[8] = {0, 38, 26, 20, 15, 5, 2, 0, }; //From white point of view
-int EG_PASSED_BONUS = 5;
+int KING_ATTACKS[6] = {0, -7, 11, 4, 3, 0};
+
+int PASSED_VALUE[8] = {4, 16, 4, 3, 8, 10, -1, -22, }; //From white point of view
+int EG_PASSED_BONUS = -16;
 
 int MG_PIECE_VALUES[6] = {96, 312, 330, 530, 999, 20000, };
 int EG_PIECE_VALUES[6] = {105, 308, 335, 540, 992, 20000, };
-int MG_PST_VALUES[6][64] = 
+
+int MG_BISHOP_PAIR = 1;
+int EG_BISHOP_PAIR = 20;
+
+int MG_PST_VALUES[6][64] =
 {
 {
+0, 0, 0, 0, 0, 0, 0, 0, 
+33, 73, 12, 72, 60, 66, -3, -27,
+-38, -15, -3, 5, 3, 80, -9, -42, 
+-21, 1, -10, -2, 3, -23, -11, -17,
+-36, -5, -13, 1, -1, -5, -24, -52, 
+-32, -22, -3, -16, -1, -21, 5, -21,
+-23, 1, -25, -25, -15, 24, 28, -19, 
 0, 0, 0, 0, 0, 0, 0, 0,
-92, 128, 55, 89, 74, 132, 28, -5, 
--12, 1, 20, 25, 59, 62, 19, -14, 
--16, 7, 0, 15, 17, 6, 11, -17,
--33, 4, -7, 6, 11, 0, 4, -31, 
--32, -10, 2, -16, 9, -3, 35, -18,
--29, 5, -18, -17, -9, 30, 44, -16, 
-0, 0, 0, 0, 0, 0, 0, 0,
 },
 {
--173, -83, -40, -55, 67, -91, -9, -101, 
--79, -35, 78, 42, 29, 68, 1, -11, 
--53, 66, 43, 71, 90, 135, 67, 50, 
--3, 11, 13, 59, 43, 63, 12, 28,
--7, 10, 22, 19, 34, 13, 15, -2,
--17, -15, 14, 16, 15, 15, 19, -22, 
--35, -59, -6, -9, 5, 12, -8, -13, 
--111, -15, -64, -27, -19, -28, -13, -17,
+-232, -111, -83, -79, 117, -85, -44, -58, 
+-77, 12, 73, 56, 75, 107, -32, -1,
+4, 32, 30, 75, 116, 172, 102, 37, 
+5, 18, 13, 45, 30, 29, 16, 47, 
+4, -5, 32, 24, 36, 10, 14, -18, 
+-23, -3, 22, 21, 6, 19, 11, -22,
+-31, -13, 14, 11, 16, 33, -1, 6, 
+-56, -13, -51, -12, -23, -10, -15, -15,
 },
 {
--23, -2, -76, -43, -19, -36, 1, -2,
--32, 22, -12, -7, 24, 65, 12, -41, 
--22, 31, 49, 34, 29, 56, 43, -8, 
--10, -1, 13, 44, 43, 31, 11, -8,
--12, 7, 7, 20, 28, 18, 4, -2,
-6, 15, 15, 19, 20, 27, 24, 4, 
-10, 21, 22, 6, 13, 27, 39, -5,
--27, -9, -8, -15, -7, -10, -33, -15, 
+-29, -55, -77, -71, -85, -43, 42, -35,
+10, 19, -4, 46, -21, 78, 5, 18,
+-17, 3, 53, 26, 62, 82, 69, 20, 
+-12, 7, 32, 34, 30, 4, 6, 27, 
+-19, 25, 14, 50, 37, 14, 15, -13,
+33, 47, 27, 23, 23, 44, 20, 27, 
+-18, 45, 9, 8, 33, 74, 67, 28,
+33, 22, 18, 17, 11, 15, -2, 10, 
 },
 {
-38, 42, 38, 45, 57, 9, 25, 37, 
-21, 26, 52, 56, 74, 73, 32, 50, 
-1, 13, 20, 42, 23, 51, 67, 22,
--18, -5, 1, 32, 18, 41, -14, -26, 
--42, -20, -6, -7, 11, -1, 0, -21, 
--51, -31, -10, -11, -3, 6, 1, -27,
--38, -22, -14, -15, -7, 17, 0, -77, 
--21, -7, -5, 11, 22, 13, -43, -24, 
+-4, 29, 0, 52, 84, 43, -5, 26,
+-18, -24, 6, 27, 21, 107, -6, 0, 
+-4, -30, -7, 23, 30, 36, 52, 44, 
+-51, -17, -41, 32, -37, 29, -23, -20,
+-54, -40, -28, -57, -8, -42, -60, -42, 
+-12, -63, -16, -10, -31, 2, 26, -1,
+-26, -51, -27, -26, -35, -13, -5, -92, 
+-15, -9, 3, 11, 9, 7, -55, -24,
 },
 {
--34, 6, 23, 18, 53, 50, 37, 51, 
--18, -45, -11, -5, -10, 63, 22, 60, 
--7, -23, 1, 14, 23, 50, 41, 53,
--21, -21, -22, -10, -7, 11, 4, -5, 
--11, -20, -15, -16, -8, -10, 5, -9, 
--20, 8, -5, -8, -11, -4, 20, 11,
--29, -2, 5, -4, 14, 9, -9, 7, 
-5, -12, -11, 16, -21, -19, -37, -44, 
-},
+-53, 30, 60, 36, 30, 67, 31, 51, 
+-48, -41, -28, -65, -71, 37, 33, 96,
+-14, -55, -29, 3, 24, 56, -10, 28, 
+-11, -40, -9, -41, -9, -16, 21, -9, 
+-8, -39, -38, -26, -12, -19, 14, -30,
+-50, -8, -7, -12, -15, -5, -18, -27, 
+-13, -1, -1, 3, 19, 33, 40, 5, 
+-1, -2, 5, 14, -17, 2, -59, -15,
+}, 
 {
--71, 17, 22, -9, -62, -28, 8, 19, 
-23, 5, -14, -1, -14, 2, -44, -35, 
--15, 30, -4, -10, -26, 12, 28, -16, 
--23, -14, -18, -21, -36, -19, -8, -30, 
--43, 5, -21, -33, -52, -50, -27, -57,
--20, -20, -28, -40, -50, -24, -21, -21, 
--5, 1, -2, -70, -49, -10, 3, 6,
--13, 30, 18, -60, 14, -30, 30, 8, 
+-105, 72, 4, 34, -68, -11, 51, -28,
+-20, -2, 18, -31, -34, 29, -81, 12, 
+27, 10, -6, 16, -26, 60, 45, 4, 
+-22, 22, -43, -40, -80, -29, -9, -46, 
+-5, 19, 34, -26, -42, -58, -47, -29,
+-7, 10, -3, -58, -72, -28, -6, -1, 
+-28, -17, -27, -69, -64, -8, 4, 2, 
+-55, 34, 22, -71, 6, -31, 24, 8,
 },
 };
+
 //endgame pst table
 int EG_PST_VALUES[6][64] =
 {
 {
 0, 0, 0, 0, 0, 0, 0, 0, 
-172, 179, 152, 128, 141, 138, 159, 181,
-100, 102, 91, 73, 50, 59, 76, 88, 
-38, 22, 17, -1, -8, 10, 21, 13, 
-19, 15, -1, -13, -13, -14, -3, -7,
--2, 13, -12, 7, 2, -3, -7, -2, 
-19, 14, 2, 16, 7, 6, 8, -1,
+193, 159, 167, 143, 109, 158, 186, 188,
+119, 110, 88, 74, 64, 35, 73, 101, 
+37, 22, 14, 5, -9, 9, 19, 8,
+11, 6, -9, -17, -18, -13, 2, -4, 
+7, 19, -22, 6, -12, -3, -6, -8,
+14, 12, 15, 17, 10, -5, -9, -11,
 0, 0, 0, 0, 0, 0, 0, 0, 
 },
 {
--52, -44, -7, -34, -37, -33, -57, -93, 
--31, -14, -19, -8, -3, -31, -30, -46,
--18, -14, 16, 15, 5, -15, -25, -35, 
--11, 9, 16, 16, 20, 5, 2, -12,
--24, 0, 10, 31, 22, 11, -2, -12, 
--29, -9, -7, 21, 16, -9, -26, -16, 
--48, -26, -16, -11, 4, -14, -17, -50, 
--35, -45, -17, -9, -16, -12, -44, -58,
+-56, -40, -62, 16, -47, -3, -14, -64,
+30, -21, -57, -56, -12, -31, 5, -31, 
+-53, -26, 16, -25, -1, -32, 0, -13,
+4, 16, 24, 41, 37, 41, 24, -37, 
+5, 22, 15, 27, 19, 6, 18, -27,
+-41, 1, -6, 25, 31, -2, -7, 9, 
+-43, -55, -9, 14, -3, 14, -11, -5, 
+-60, -17, 10, 6, -10, -31, -23, -15,
 },
 {
--8, -27, -5, -14, -1, -3, -11, -18,
--14, -10, 13, -6, -9, -7, 2, -8, 
--4, -14, -6, -5, 0, 0, -6, -2, 
--9, 3, 6, 3, 20, 4, 9, -4, 
-0, 9, 15, 13, 1, 16, -9, -15,
--6, 3, 14, 16, 19, 7, -1, -21, 
--8, -12, -13, 5, 2, -3, -9, -33, 
--17, -15, -17, -11, -3, -10, 1, -23,
-}, 
-{
-19, 16, 14, 9, 6, 6, 2, 1,
-5, 7, 7, 5, 3, 9, 14, 9, 
-3, 13, 13, 11, -2, 3, 1, -3,
-10, 9, 7, 7, -4, 7, -7, 8, 
-9, 11, 14, -2, 1, 0, -2, -17,
-0, -6, -11, 5, -1, -6, -14, -10, 
-0, -12, 6, -4, -15, -3, -13, -9, 
--3, 8, 9, -7, -11, -7, -2, -26, 
+-1, -51, -17, -1, -27, -4, -7, 10, 
+-50, -14, -16, -27, 6, -10, -2, -7, 
+-2, -2, -20, 4, 3, 3, -30, 13,
+19, 2, -6, 25, 8, -2, -8, -21, 
+-12, -13, 4, 14, 3, 15, -19, -45,
+-15, 2, -4, 20, 14, 6, 11, -12, 
+16, -14, -13, 30, -6, 8, -11, -13, 
+-25, -10, -1, 4, -1, -25, -19, -41,
 },
 {
--3, 16, 16, 33, 21, 25, 12, 26,
--11, 26, 26, 35, 64, 31, 36, 6, 
--14, 12, 3, 55, 41, 41, 13, 3, 
-9, 16, 18, 51, 51, 34, 63, 42, 
--12, 22, 13, 41, 25, 28, 45, 29,
--22, -21, 21, 12, 3, 11, 16, 11, 
--16, -17, -36, -22, -10, -29, -42, -26, 
--27, -22, -16, -37, 1, -26, -14, -47,
-}, 
-{
--80, -41, -12, -12, -17, 21, 10, -11,
--6, 23, 20, 23, 11, 44, 17, 5, 
-4, 11, 17, 17, 14, 51, 38, 19, 
--14, 28, 18, 21, 20, 33, 32, 9,
--12, -10, 27, 30, 21, 29, 5, -5, 
--21, -9, 9, 27, 29, 16, 1, -3,
--33, -5, 10, 19, 8, 10, 1, -23, 
--47, -40, -15, -17, -22, -8, -30, -49, 
+25, 12, -10, -7, 7, -5, -9, 3, 
+-2, 16, 6, 6, 2, -16, 12, 0,
+11, 28, 8, -2, -20, -27, -19, -17, 
+14, 3, 14, -15, 11, 0, -17, -2, 
+10, 20, -14, 13, -8, -4, -9, -21,
+2, 25, -6, -16, 7, -5, -53, -9, 
+11, -3, 16, 1, -10, -15, 2, -25,
+0, -5, -5, -7, -17, -10, -2, -19, 
 },
+{
+40, 58, 7, 38, -34, 24, 55, 67,
+45, 22, 30, 78, 69, 63, 39, -43, 
+-9, -28, 62, 6, 74, 38, 46, -25,
+-3, 19, -20, 60, 22, 25, 41, 7, 
+-20, 35, 64, 11, 25, 6, 65, 41,
+2, -19, 26, -3, 13, 25, 53, 40, 
+22, 14, -16, 18, -23, -23, -61, 17, 
+-10, -23, 17, -17, 26, -50, 34, 3,
+},
+{
+-119, 14, -28, -26, -37, 28, 4, -66,
+-2, 32, -30, -16, 22, 3, 24, 9,
+-33, 0, 37, -2, 17, 22, 40, 24, 
+-29, 6, 19, 36, 14, 28, 19, 17,
+-48, -22, 4, 27, 15, 23, 5, -10, 
+-4, -13, 4, 23, 30, 17, -9, -19,
+-37, -4, 22, 28, 28, 6, -7, -18, 
+-23, -44, -16, 2, -17, -24, -37, -54,
+},
+};
+
+int KING_EDGE[64] = 
+{
+  -100,  -95,  -90,  -90,  -90,  -90,  -95,  -100,  
+  -95,  -50,  -50,  -50,  -50,  -50,  -50,  -95,  
+  -90,  -50,  -10,  -10,  -10,  -10,  -50,  -90,  
+  -90,  -50,  -10,    0,    0,  -10,  -50,  -90,  
+  -90,  -50,  -10,    0,    0,  -10,  -50,  -90,  
+  -90,  -50,  -10,  -10,  -10,  -10,  -50,  -90,  
+  -95,  -50,  -50,  -50,  -50,  -50,  -50,  -95,  
+  -100,  -95,  -90,  -90,  -90,  -90,  -95,  -100,
 };
 
 bool improving;
 double best_e;
-double K_VAL = 1;
+double K_VAL = 1.6;
 int POSITIONS_NUM = 100000;
-int TUNING_DELTA = 2;
+int TUNING_DELTA = 1;
 
 namespace Tuner {
-U64 PASSED_MASK[2][64];
-
+    U64 DOUBLED_MASK[64];
+    U64 ISOLATED_MASK[64];
+    U64 PASSED_MASK[2][64];
 }
 
 void Tuner::init_eval(){
@@ -160,6 +184,9 @@ void Tuner::init_eval(){
         PASSED_MASK[BLACK][square] = Attacks::FILES_BB[square&7] | 
         ((Attacks::FILES_BB[square&7] & ~Attacks::FILES_BB[7]) << 1) |
          ((Attacks::FILES_BB[square&7] & ~Attacks::FILES_BB[0]) >> 1);
+
+        ISOLATED_MASK[square] = PASSED_MASK[WHITE][square] & ~Attacks::FILES_BB[square&7];
+        DOUBLED_MASK[square] = Attacks::FILES_BB[square&7];
 
         int rank = square/8;
         //white
@@ -176,21 +203,40 @@ void Tuner::init_eval(){
 //simple hand crafted eval
 //currently has material, tuned piece square tables and mobility 
 float Tuner::evaluation_tune(Board &board){
-    float value = 0, game_phase = 0;
-    float mg_value[2] = {0,0};
-    float eg_value[2] = {0,0};
+    float value = 0;
+    int game_phase = 0;
+    int mg_value[2] = {0,0};
+    int eg_value[2] = {0,0};
+    U64 mobility_board;
     int square, mobility_squares;
-    U64 piece_board; //copy of board
+    U64 piece_board; //copy of piece board
+    
+    int king_squares[2] = {get_lsb(board.piece_boards[WHITE][KING_I]),
+                            get_lsb(board.piece_boards[BLACK][KING_I])};
 
     for (int c = WHITE; c <= BLACK; c++) {
         for (int p = PAWN_I; p <= KING_I; p++){
             piece_board = board.piece_boards[c][p];
+            //bishop pair
+            if (p == BISHOP_I && Attacks::count_bits(piece_board) > 1) {
+                mg_value[c] += MG_BISHOP_PAIR;
+                eg_value[c] += EG_BISHOP_PAIR;
+            }
+
             while (piece_board) {
                 square = pop_lsb(&piece_board);
-                //mobility value
-                mobility_squares = board.moves_at(square, c, p);
-                mg_value[c] += (mobility_squares-MAX_PIECE_BITS[p]/2)*MG_MOBILITY[p];
-                eg_value[c] += (mobility_squares-MAX_PIECE_BITS[p]/2)*EG_MOBILITY[p];   
+                
+                if (p != PAWN_I && p != KING_I) {
+                    mobility_board = board.attackers_from(square, c, p);
+                    //mobility value
+                    mobility_squares = Attacks::count_bits(mobility_board);
+                    mg_value[c] += (mobility_squares-MAX_PIECE_BITS[p]/2)*MG_MOBILITY[p];
+                    eg_value[c] += (mobility_squares-MAX_PIECE_BITS[p]/2)*EG_MOBILITY[p];  
+                    //king safety values
+                    mg_value[c] += Attacks::count_bits(mobility_board & Attacks::KING_ATTACKS[king_squares[c^1]]) * KING_ATTACKS[p];
+                    //update phase value based on pieces present
+                    game_phase += PHASE_VALUES[p];
+                } 
                 //material value
                 mg_value[c] += MG_PIECE_VALUES[p];
                 eg_value[c] += EG_PIECE_VALUES[p];
@@ -198,21 +244,37 @@ float Tuner::evaluation_tune(Board &board){
                 //positional value
                 mg_value[c] += MG_PST_VALUES[p][flip_board[c][square]];
                 eg_value[c] += EG_PST_VALUES[p][flip_board[c][square]];        
-                game_phase += PHASE_VALUES[p];
-                //passed pawn eval
-                if (p == PAWN_I && !(PASSED_MASK[c][square] & board.piece_boards[c^1][PAWN_I])) {
-                    int rank = flip_board[c][square]/8;
-                    mg_value[c] += PASSED_VALUE[rank];
-                    eg_value[c] += PASSED_VALUE[rank] + EG_PASSED_BONUS;     
-                }
+
             }
         }
+        //pawn structure eval
+        //doubled pawn eval
+        if (DOUBLED_MASK[square] & board.piece_boards[c][PAWN_I]) {
+            mg_value[c] -= MG_DOUBLED_VALUE;
+            eg_value[c] -= EG_DOUBLED_VALUE;
+        }
+        //isolated pawn eval
+        if (!(ISOLATED_MASK[square] & board.piece_boards[c][PAWN_I])) {
+            mg_value[c] -= MG_ISOLATED_VALUE;
+            eg_value[c] -= EG_ISOLATED_VALUE;
+        }
+        
+        //passed pawn eval
+        if (!(PASSED_MASK[c][square] & board.piece_boards[c^1][PAWN_I])) {
+            int rank = flip_board[c][square]/8;
+            mg_value[c] += PASSED_VALUE[rank];
+            eg_value[c] += PASSED_VALUE[rank] + EG_PASSED_BONUS; 
+        }
+        
+        //if only the king is left push the king to the edge of the board
+        if (!(board.piece_co[c] ^ board.piece_boards[c][KING_I])) {
+            eg_value[c] += KING_EDGE[king_squares[c]];
+        }    
     }
 
-    float phase = (game_phase * 256 + (MAX_PHASE / 2)) / MAX_PHASE;
+    int phase = (game_phase * 256 + (MAX_PHASE / 2)) / MAX_PHASE;
     value = ((mg_value[WHITE]-mg_value[BLACK]) * phase + (eg_value[WHITE]-eg_value[BLACK]) * (256-phase))/256;
     return value;
-    //return (board.turn == WHITE) ? value : -value;
 }
 
 //mean square error used for tuner
@@ -356,25 +418,31 @@ void Tuner::tune(int time) {
     while (improving && duration_cast<seconds>(steady_clock::now() - start_time).count() < time) {
         improving = false;
         //run through parameters
-        for (int p = PAWN_I; p <= KING_I; p++) {
-            //tune_parameter(MG_PIECE_VALUES, p); 
-            //tune_parameter(EG_PIECE_VALUES, p); 
+        //for (int p = PAWN_I; p <= KING_I; p++) {
+            // tune_parameter(MG_PIECE_VALUES, p); 
+            // tune_parameter(EG_PIECE_VALUES, p); 
             // tune_parameter(MG_MOBILITY, p); 
             // tune_parameter(EG_MOBILITY, p); 
-            for (int s = 0; s < 64; s++) {
-                if (p == PAWN_I && (s < 8 || s > 64-8)) {
-                    continue;
-                }
-                tune_parameter(MG_PST_VALUES, p, s);
-                tune_parameter(EG_PST_VALUES, p, s);
-            }
-        }
+            // tune_parameter(KING_ATTACKS, p);
+            // for (int s = 0; s < 64; s++) {
+            //     if (p == PAWN_I && (s < 8 || s > 64-8)) {
+            //         continue;
+            //     }
+            //     tune_parameter(MG_PST_VALUES, p, s);
+            //     tune_parameter(EG_PST_VALUES, p, s);
+            // }
+        //}
         // for (int f = 0; f < 8; f++) {
         //     tune_parameter(PASSED_VALUE[f]); 
         // }
         // tune_parameter(EG_PASSED_BONUS);
-        //if (TUNING_DELTA >= 2) {TUNING_DELTA /= 2;}
-        //if (POSITIONS_NUM <= 95000) {POSITIONS_NUM += 5000;}
+        // tune_parameter(MG_DOUBLED_VALUE);
+        // tune_parameter(EG_DOUBLED_VALUE);
+        // tune_parameter(MG_ISOLATED_VALUE);
+        // tune_parameter(EG_ISOLATED_VALUE);
+        tune_parameter(MG_BISHOP_PAIR);
+        tune_parameter(EG_BISHOP_PAIR);
+        if (TUNING_DELTA > 1) {TUNING_DELTA--;}
     }
     //show table
     int i = 0;
@@ -404,6 +472,14 @@ void Tuner::tune(int time) {
         cout << val << ", ";
     }
     cout << "};" << endl;
+    //KING SAFETY
+    cout << "{";
+    for (int &val : KING_ATTACKS) {
+        cout << val << ", ";
+    }
+    cout << "};" << endl;
+
+
     //MG PST
     cout << "{" << endl;
     for (int p = PAWN_I; p <= KING_I; p++) {
@@ -449,15 +525,21 @@ void Tuner::tune(int time) {
     }
     cout << "};" << endl;
     //EG BONUS
-    cout << EG_PASSED_BONUS;
-
+    cout << EG_PASSED_BONUS << endl;
+    //PAWN STRUCTURE
+    cout << MG_DOUBLED_VALUE << endl;
+    cout << EG_DOUBLED_VALUE << endl;
+    cout << MG_ISOLATED_VALUE << endl;
+    cout << EG_ISOLATED_VALUE << endl;
+    cout << MG_BISHOP_PAIR << endl;
+    cout << EG_BISHOP_PAIR << endl;
 }
 
 void calculate_k() {
     float best_k = 1;
     double best_e = 1e9;
     double res;
-    for ( float k = 0.01; k < 2; k+=0.01)
+    for ( float k = 0.6; k < 2; k+=0.05)
     {
 	res = Tuner::mean_square_error(k, 100000);
     if (res < best_e) {
