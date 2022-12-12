@@ -347,7 +347,7 @@ inline void Engine::iterative_deepening(Board& board) {
         //print uci info
         cout << "info";
         if (value < -MATE_V+MAX_DEPTH+1) {cout << " score mate " << (int)((-MATE_V-value)/2);}
-        else if (value > MATE_V-MAX_DEPTH-1) {cout << " score mate " << (int)((MATE_V-value)/2);}
+        else if (value > MATE_V-MAX_DEPTH-1) {cout << " score mate " << (int)((MATE_V-value+1)/2);}
         else {cout << " score cp " << value;}
         cout << " depth " << depth;
         cout << " time " << elapsed_time;
