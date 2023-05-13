@@ -2,18 +2,18 @@
 #include "misc.hpp"
 #include <cmath>
 //Starting Eval Params
-int MG_MOBILITY[6] = {0, 1, 3, 5, 1, 0};
-int EG_MOBILITY[6] = {0, 2, 2, 2, 8, 4};
+int MG_MOBILITY[6] = {1, 4, 4, 2, 1, 0};
+int EG_MOBILITY[6] = {0, 2, 2, 2, 2, 0};
 int MAX_PIECE_BITS[6] = {4, 8, 13, 14, 27, 8};
-int MG_DOUBLED_VALUE = -20;
-int EG_DOUBLED_VALUE = -3;
-int MG_ISOLATED_VALUE = 29;
+int MG_DOUBLED_VALUE = 6;
+int EG_DOUBLED_VALUE = 10;
+int MG_ISOLATED_VALUE = 15;
 int EG_ISOLATED_VALUE = 20;
 
-int KING_ATTACKS[6] = {0, -7, 11, 4, 3, 0};
+int KING_ATTACKS[6] = {0, 4, 4, 6, 10, 0};
 
-int PASSED_VALUE[8] = {4, 16, 4, 3, 8, 10, -1, -22, }; //From white point of view
-int EG_PASSED_BONUS = -16;
+int PASSED_VALUE[8] = {0, 20, 12, 7, 4, 3, 2, 0}; //From white point of view
+int EG_PASSED_BONUS = 10;
 
 int MG_PIECE_VALUES[6] = {96, 312, 330, 530, 999, 20000, };
 int EG_PIECE_VALUES[6] = {105, 308, 335, 540, 992, 20000, };
@@ -21,134 +21,134 @@ int EG_PIECE_VALUES[6] = {105, 308, 335, 540, 992, 20000, };
 int MG_BISHOP_PAIR = 1;
 int EG_BISHOP_PAIR = 20;
 
-int MG_PST_VALUES[6][64] =
+float MG_PST_VALUES[6][64] = 
 {
 {
-0, 0, 0, 0, 0, 0, 0, 0, 
-33, 73, 12, 72, 60, 66, -3, -27,
--38, -15, -3, 5, 3, 80, -9, -42, 
--21, 1, -10, -2, 3, -23, -11, -17,
--36, -5, -13, 1, -1, -5, -24, -52, 
--32, -22, -3, -16, -1, -21, 5, -21,
--23, 1, -25, -25, -15, 24, 28, -19, 
 0, 0, 0, 0, 0, 0, 0, 0,
-},
-{
--232, -111, -83, -79, 117, -85, -44, -58, 
--77, 12, 73, 56, 75, 107, -32, -1,
-4, 32, 30, 75, 116, 172, 102, 37, 
-5, 18, 13, 45, 30, 29, 16, 47, 
-4, -5, 32, 24, 36, 10, 14, -18, 
--23, -3, 22, 21, 6, 19, 11, -22,
--31, -13, 14, 11, 16, 33, -1, 6, 
--56, -13, -51, -12, -23, -10, -15, -15,
-},
-{
--29, -55, -77, -71, -85, -43, 42, -35,
-10, 19, -4, 46, -21, 78, 5, 18,
--17, 3, 53, 26, 62, 82, 69, 20, 
--12, 7, 32, 34, 30, 4, 6, 27, 
--19, 25, 14, 50, 37, 14, 15, -13,
-33, 47, 27, 23, 23, 44, 20, 27, 
--18, 45, 9, 8, 33, 74, 67, 28,
-33, 22, 18, 17, 11, 15, -2, 10, 
-},
-{
--4, 29, 0, 52, 84, 43, -5, 26,
--18, -24, 6, 27, 21, 107, -6, 0, 
--4, -30, -7, 23, 30, 36, 52, 44, 
--51, -17, -41, 32, -37, 29, -23, -20,
--54, -40, -28, -57, -8, -42, -60, -42, 
--12, -63, -16, -10, -31, 2, 26, -1,
--26, -51, -27, -26, -35, -13, -5, -92, 
--15, -9, 3, 11, 9, 7, -55, -24,
-},
-{
--53, 30, 60, 36, 30, 67, 31, 51, 
--48, -41, -28, -65, -71, 37, 33, 96,
--14, -55, -29, 3, 24, 56, -10, 28, 
--11, -40, -9, -41, -9, -16, 21, -9, 
--8, -39, -38, -26, -12, -19, 14, -30,
--50, -8, -7, -12, -15, -5, -18, -27, 
--13, -1, -1, 3, 19, 33, 40, 5, 
--1, -2, 5, 14, -17, 2, -59, -15,
+28, 68, 7, 67, 55, 61, -8, -32,
+-43, -20, -8, 0, -2, 75, -14, -47, 
+-26, -4, -15, -7, -2, -28, -16, -22,
+-31, -5, -18, -4, -6, 0, -19, -47,
+-27, -17, -8, -11, -1, -16, 5, -16, 
+-28, -4, -30, -20, -20, 19, 23, -24,
+0, 0, 0, 0, 0, 0, 0, 0,
 }, 
 {
--105, 72, 4, 34, -68, -11, 51, -28,
--20, -2, 18, -31, -34, 29, -81, 12, 
-27, 10, -6, 16, -26, 60, 45, 4, 
--22, 22, -43, -40, -80, -29, -9, -46, 
--5, 19, 34, -26, -42, -58, -47, -29,
--7, 10, -3, -58, -72, -28, -6, -1, 
--28, -17, -27, -69, -64, -8, 4, 2, 
--55, 34, 22, -71, 6, -31, 24, 8,
+-237, -106, -78, -84, 112, -90, -49, -63,
+-72, 7, 68, 51, 70, 102, -37, -6,
+9, 27, 25, 70, 111, 167, 97, 32, 
+0, 13, 8, 40, 25, 24, 11, 42,
+9, -10, 27, 19, 31, 10, 9, -13, 
+-18, 2, 17, 21, 1, 14, 6, -17,
+-26, -8, 14, 11, 21, 28, 4, 1,
+-51, -8, -46, -7, -18, -5, -10, -10, 
+},
+{
+-34, -50, -82, -66, -80, -38, 37, -40, 
+15, 14, -4, 41, -26, 73, 0, 13,
+-17, -2, 48, 21, 57, 77, 64, 15, 
+-17, 12, 27, 29, 25, -1, 11, 22,
+-14, 20, 9, 45, 32, 9, 20, -8, 
+38, 42, 27, 18, 18, 39, 15, 32,
+-13, 40, 14, 13, 28, 69, 62, 23, 
+38, 27, 13, 22, 16, 20, 3, 15, 
+},
+{
+-9, 24, -5, 47, 79, 38, 0, 21,
+-23, -29, 1, 22, 16, 102, -11, -5, 
+-9, -35, -12, 18, 25, 31, 47, 39,
+-51, -22, -36, 27, -42, 24, -18, -25, 
+-49, -45, -23, -62, -13, -47, -55, -37,
+-7, -58, -11, -5, -26, 7, 21, 4,
+-21, -46, -22, -21, -30, -18, -10, -87, 
+-20, -4, -2, 6, 4, 2, -50, -19,
+},
+{
+-58, 25, 55, 31, 35, 62, 26, 46,
+-53, -46, -33, -70, -76, 32, 28, 91,
+-19, -50, -34, -2, 19, 51, -15, 23, 
+-16, -35, -14, -46, -14, -21, 16, -9,
+-3, -44, -33, -26, -17, -14, 9, -25,
+-45, -8, -2, -7, -10, -5, -13, -22, 
+-8, -1, -1, 3, 14, 28, 45, 10,
+4, 3, 10, 9, -12, 7, -54, -10,
+},
+{
+-110, 67, 9, 29, -63, -16, 46, -23, 
+-25, -7, 13, -36, -39, 24, -86, 7,
+22, 5, -11, 11, -31, 55, 40, -1,
+-27, 17, -48, -45, -85, -34, -14, -51, 
+-10, 14, 39, -31, -47, -63, -52, -34,
+-2, 15, 2, -53, -67, -33, -11, 4, 
+-23, -22, -22, -64, -59, -3, 9, 7,
+-50, 29, 17, -66, 11, -26, 19, 13,
+},
+};
+//endgame pst table
+float EG_PST_VALUES[6][64] = 
+{
+{
+0, 0, 0, 0, 0, 0, 0, 0,
+188, 154, 162, 138, 104, 153, 181, 183,
+114, 105, 83, 69, 59, 30, 68, 96, 
+32, 17, 9, 0, -14, 4, 14, 3,
+6, 1, -14, -22, -23, -18, -3, -4, 
+7, 14, -27, 1, -17, -8, -11, -13,
+9, 7, 10, 12, 5, -10, -14, -16,
+0, 0, 0, 0, 0, 0, 0, 0, 
+},
+{
+-61, -45, -67, 11, -42, -8, -19, -59, 
+35, -26, -62, -61, -17, -36, 0, -26,
+-53, -21, 11, -30, -6, -37, -5, -18,
+-1, 11, 19, 36, 32, 36, 19, -42, 
+0, 17, 10, 22, 14, 1, 13, -22,
+-36, -4, -11, 20, 26, -2, -2, 14, 
+-38, -50, -4, 14, 2, 19, -6, 0,
+-55, -12, 15, 11, -5, -26, -18, -10, 
+},
+{
+-6, -46, -12, 4, -22, 1, -2, 5,
+-45, -19, -11, -32, 1, -15, -7, -2,
+-7, 3, -25, -1, -2, -2, -35, 8, 
+14, 7, -11, 20, 3, -7, -3, -26,
+-17, -18, -1, 9, -2, 10, -19, -40,
+-10, -3, -9, 15, 9, 1, 16, -7, 
+21, -19, -8, 25, -11, 3, -16, -8,
+-20, -5, -6, 9, 4, -20, -14, -36,
+},
+{
+20, 7, -15, -2, 2, -5, -4, -2,
+-7, 11, 1, 1, -3, -21, 7, -5, 
+6, 23, 3, -7, -25, -32, -24, -22,
+9, -2, 9, -20, 6, -5, -22, -7,
+5, 15, -19, 8, -13, -9, -14, -16, 
+-3, 20, -11, -11, 2, -10, -58, -14,
+16, 2, 11, 6, -5, -10, -3, -20,
+-5, 0, -5, -12, -12, -15, 3, -24, 
+},
+{
+35, 53, 2, 33, -29, 19, 50, 62,
+40, 17, 25, 73, 64, 58, 34, -48, 
+-9, -23, 57, 1, 69, 33, 41, -30, 
+-8, 24, -25, 55, 17, 20, 36, 2, 
+-15, 30, 59, 6, 20, 1, 60, 46,
+7, -24, 21, 2, 18, 20, 48, 45, 
+27, 9, -11, 13, -18, -28, -56, 22, 
+-5, -18, 22, -12, 31, -45, 39, 8,
+},
+{
+-124, 9, -33, -31, -32, 23, -1, -71,
+-7, 27, -35, -21, 17, -2, 19, 4,
+-38, -5, 32, -7, 12, 17, 35, 19, 
+-34, 1, 14, 31, 9, 23, 14, 12, 
+-43, -27, -1, 22, 10, 18, 0, -15,
+1, -8, 9, 28, 25, 12, -14, -14, 
+-32, 1, 27, 33, 33, 11, -7, -13,
+-18, -39, -11, 7, -12, -19, -42, -49, 
 },
 };
 
-//endgame pst table
-int EG_PST_VALUES[6][64] =
-{
-{
-0, 0, 0, 0, 0, 0, 0, 0, 
-193, 159, 167, 143, 109, 158, 186, 188,
-119, 110, 88, 74, 64, 35, 73, 101, 
-37, 22, 14, 5, -9, 9, 19, 8,
-11, 6, -9, -17, -18, -13, 2, -4, 
-7, 19, -22, 6, -12, -3, -6, -8,
-14, 12, 15, 17, 10, -5, -9, -11,
-0, 0, 0, 0, 0, 0, 0, 0, 
-},
-{
--56, -40, -62, 16, -47, -3, -14, -64,
-30, -21, -57, -56, -12, -31, 5, -31, 
--53, -26, 16, -25, -1, -32, 0, -13,
-4, 16, 24, 41, 37, 41, 24, -37, 
-5, 22, 15, 27, 19, 6, 18, -27,
--41, 1, -6, 25, 31, -2, -7, 9, 
--43, -55, -9, 14, -3, 14, -11, -5, 
--60, -17, 10, 6, -10, -31, -23, -15,
-},
-{
--1, -51, -17, -1, -27, -4, -7, 10, 
--50, -14, -16, -27, 6, -10, -2, -7, 
--2, -2, -20, 4, 3, 3, -30, 13,
-19, 2, -6, 25, 8, -2, -8, -21, 
--12, -13, 4, 14, 3, 15, -19, -45,
--15, 2, -4, 20, 14, 6, 11, -12, 
-16, -14, -13, 30, -6, 8, -11, -13, 
--25, -10, -1, 4, -1, -25, -19, -41,
-},
-{
-25, 12, -10, -7, 7, -5, -9, 3, 
--2, 16, 6, 6, 2, -16, 12, 0,
-11, 28, 8, -2, -20, -27, -19, -17, 
-14, 3, 14, -15, 11, 0, -17, -2, 
-10, 20, -14, 13, -8, -4, -9, -21,
-2, 25, -6, -16, 7, -5, -53, -9, 
-11, -3, 16, 1, -10, -15, 2, -25,
-0, -5, -5, -7, -17, -10, -2, -19, 
-},
-{
-40, 58, 7, 38, -34, 24, 55, 67,
-45, 22, 30, 78, 69, 63, 39, -43, 
--9, -28, 62, 6, 74, 38, 46, -25,
--3, 19, -20, 60, 22, 25, 41, 7, 
--20, 35, 64, 11, 25, 6, 65, 41,
-2, -19, 26, -3, 13, 25, 53, 40, 
-22, 14, -16, 18, -23, -23, -61, 17, 
--10, -23, 17, -17, 26, -50, 34, 3,
-},
-{
--119, 14, -28, -26, -37, 28, 4, -66,
--2, 32, -30, -16, 22, 3, 24, 9,
--33, 0, 37, -2, 17, 22, 40, 24, 
--29, 6, 19, 36, 14, 28, 19, 17,
--48, -22, 4, 27, 15, 23, 5, -10, 
--4, -13, 4, 23, 30, 17, -9, -19,
--37, -4, 22, 28, 28, 6, -7, -18, 
--23, -44, -16, 2, -17, -24, -37, -54,
-},
-};
 
 int KING_EDGE[64] = 
 {
@@ -162,17 +162,19 @@ int KING_EDGE[64] =
   -100,  -95,  -90,  -90,  -90,  -90,  -95,  -100,
 };
 
+namespace Tuner {
+U64 DOUBLED_MASK[64];
+U64 ISOLATED_MASK[64];
+U64 PASSED_MASK[2][64];
+U64 HALF_BOARD[2];
+}
+
 bool improving;
 double best_e;
 double K_VAL = 1.6;
-int POSITIONS_NUM = 100000;
+int POSITIONS_NUM = 1000000;
 int TUNING_DELTA = 1;
-
-namespace Tuner {
-    U64 DOUBLED_MASK[64];
-    U64 ISOLATED_MASK[64];
-    U64 PASSED_MASK[2][64];
-}
+const int THREADS = 4;
 
 void Tuner::init_eval(){
     for (int square = 0; square < 64; square++) {
@@ -198,15 +200,17 @@ void Tuner::init_eval(){
             PASSED_MASK[BLACK][square] &= ~Attacks::RANKS_BB[r];
         }
     }
+    HALF_BOARD[WHITE] = Attacks::RANKS_BB[0] | Attacks::RANKS_BB[1] | Attacks::RANKS_BB[2] | Attacks::RANKS_BB[3];
+    HALF_BOARD[BLACK] = Attacks::RANKS_BB[4] | Attacks::RANKS_BB[5] | Attacks::RANKS_BB[6] | Attacks::RANKS_BB[7];
 }
 
 //simple hand crafted eval
 //currently has material, tuned piece square tables and mobility 
 float Tuner::evaluation_tune(Board &board){
-    float value = 0;
-    int game_phase = 0;
-    int mg_value[2] = {0,0};
-    int eg_value[2] = {0,0};
+    float value = 0, game_phase = 0;
+    float mg_value[2] = {0,0};
+    float eg_value[2] = {0,0};
+    int king_safety;
     U64 mobility_board;
     int square, mobility_squares;
     U64 piece_board; //copy of piece board
@@ -217,23 +221,34 @@ float Tuner::evaluation_tune(Board &board){
     for (int c = WHITE; c <= BLACK; c++) {
         for (int p = PAWN_I; p <= KING_I; p++){
             piece_board = board.piece_boards[c][p];
-            //bishop pair
-            if (p == BISHOP_I && Attacks::count_bits(piece_board) > 1) {
-                mg_value[c] += MG_BISHOP_PAIR;
-                eg_value[c] += EG_BISHOP_PAIR;
-            }
+            //bishop pair *retune values
+            // if (p == BISHOP_I && Attacks::count_bits(piece_board) == 2) {
+            //     mg_value[c] += MG_BISHOP_PAIR;
+            //     eg_value[c] += EG_BISHOP_PAIR;
+            // }
 
             while (piece_board) {
                 square = pop_lsb(&piece_board);
                 
-                if (p != PAWN_I && p != KING_I) {
+                if (p != KING_I) {
                     mobility_board = board.attackers_from(square, c, p);
                     //mobility value
-                    mobility_squares = Attacks::count_bits(mobility_board);
-                    mg_value[c] += (mobility_squares-MAX_PIECE_BITS[p]/2)*MG_MOBILITY[p];
-                    eg_value[c] += (mobility_squares-MAX_PIECE_BITS[p]/2)*EG_MOBILITY[p];  
+                    if (p == PAWN_I) {
+                        mobility_squares = Attacks::count_bits(mobility_board & HALF_BOARD[c]);
+                        mg_value[c] += (mobility_squares-1)*MG_MOBILITY[p];
+                        eg_value[c] += (mobility_squares-1)*EG_MOBILITY[p]; 
+                    }
+                    else {
+                        mobility_squares = Attacks::count_bits(mobility_board);
+                        mg_value[c] += (mobility_squares-MAX_PIECE_BITS[p]/2)*MG_MOBILITY[p];
+                        eg_value[c] += (mobility_squares-MAX_PIECE_BITS[p]/2)*EG_MOBILITY[p]; 
+                    }
+
+ 
                     //king safety values
-                    mg_value[c] += Attacks::count_bits(mobility_board & Attacks::KING_ATTACKS[king_squares[c^1]]) * KING_ATTACKS[p];
+                    king_safety = Attacks::count_bits(mobility_board & Attacks::KING_ATTACKS[king_squares[c^1]]) * KING_ATTACKS[p];
+                    mg_value[c] += king_safety;
+                    eg_value[c] += king_safety/2;
                     //update phase value based on pieces present
                     game_phase += PHASE_VALUES[p];
                 } 
@@ -268,55 +283,96 @@ float Tuner::evaluation_tune(Board &board){
         
         //if only the king is left push the king to the edge of the board
         if (!(board.piece_co[c] ^ board.piece_boards[c][KING_I])) {
+            mg_value[c] += KING_EDGE[king_squares[c]];
             eg_value[c] += KING_EDGE[king_squares[c]];
         }    
     }
 
-    int phase = (game_phase * 256 + (MAX_PHASE / 2)) / MAX_PHASE;
+    float phase = (game_phase * 256 + (MAX_PHASE / 2)) / MAX_PHASE;
     value = ((mg_value[WHITE]-mg_value[BLACK]) * phase + (eg_value[WHITE]-eg_value[BLACK]) * (256-phase))/256;
-    return value;
+    return (board.turn == WHITE) ? value : -value;
 }
 
 //mean square error used for tuner
-double Tuner::mean_square_error(float K=K_VAL, int positions=POSITIONS_NUM) {
+double Tuner::mean_square_error(float K, vector<TunerEntry> positions) {
     Board board;
     float value;
     double error = 0.0, result, sigmoid;
     int pos = 1; // keeps track of position number
-    fstream fen_file; 
-    //positions.txt should have fens and at the end the game result
-    //open the file and read fens to calculate mean square error
-    fen_file.open("src/tools/positions.txt",ios::in);
-    if (fen_file.is_open()) {
-        string fen;
-        while(getline(fen_file, fen)){ 
-            // string outcome = fen.substr(fen.length()-4, 3);
-            // result = std::stof(outcome);
-            // fen = fen.substr(0, fen.length()-5); //remove outcome from fen 
-            if (fen.find("1-0") != std::string::npos) {result = 1.0;}
-            else if (fen.find("0-1") != std::string::npos) {result = 0.0;}
-            else {result = 0.5;}
+    
+    for (TunerEntry entry : positions) {
+        board.set_fen(entry.fen);
+        value = evaluation_tune(board);
+        sigmoid = 1/(1 + pow(10, -K*value*0.01));
 
-            fen = fen.substr(0, fen.find("\"")-3);
-            board.set_fen(fen);
-            value = evaluation_tune(board);
-            sigmoid = 1/(1 + pow(10, -K*value/400.0));
-
-            error += pow(result - sigmoid, 2);
-            //stop if we are done with the positions
-            if (pos >= positions) {break;}
-            pos++;
-        }
-        fen_file.close(); 
+        error += pow(entry.result - sigmoid, 2);   
     }
-    return error/positions;
+    return error/positions.size();
 }
 
+// double Tuner::thread_mse(float K, vector<TunerEntry> positions, double* error) {
+//     Board board;
+//     float value;
+//     double result, sigmoid;
+//     int pos = 1; // keeps track of position number
+    
+//     for (TunerEntry entry : positions) {
+//         board.set_fen(entry.fen);
+//         value = evaluation_tune(board);
+//         sigmoid = 1/(1 + pow(10, -K*value*0.01));
+
+//         *error += pow(entry.result - sigmoid, 2);   
+//     }
+// }
+
+// double Tuner::threaded_mse(float K, vector<TunerEntry> positions) {
+//     double errors[THREADS] = {0};
+//     vector<TunerEntry> batches[THREADS];
+
+//     int split_size = positions.size() / THREADS;
+//     int current = 0;
+//     for (int t = 0; t < THREADS; t++) {
+
+//         int i = 0;
+
+//         while (i <= split_size && (i + current) < positions.size()) {
+//             batches[t].push_back(positions[current + i]);
+//             i++;
+//         }
+
+//         current += i;
+//     }
+
+//     if (THREADS > 1) {
+//         std::vector<std::thread> workers;
+
+//         for (int t = 0; t < THREADS; t++) {
+//             workers.push_back(std::thread(thread_mse, K_VAL, &batches[t], &errors[t]));
+//         }
+
+//         // Wait for the workers to complete their work, and then join them
+//         for (int t = 0; t < THREADS; t++) {
+//             workers[t].join();
+//         }
+
+//     }
+//     else { // Don't start up any workers. Just run the thread_batch function
+//         thread_mse(K_VAL, &batches[0], &errors[0]);
+//     }
+//     double avg = 0;
+//     for (int i = 0; i < THREADS; i++) {
+//         avg += errors[i];
+//     }
+// 	return (avg / double(positions.size()));
+// }
+
+
 //tune a specific parameter we pass through
-double Tuner::tune_parameter(int &arr) {
-    int delta_val = TUNING_DELTA; //value to change parameters by each iteration  
+double Tuner::tune_parameter(int &arr, vector<TunerEntry> positions) {
+    int delta_val = TUNING_DELTA; //value to change parameters by each iteration
     arr += delta_val;
-    double error = mean_square_error();
+
+    double error = mean_square_error(K_VAL, positions);
     cout << "New Error: ";
     printf("%.10f", error);
     cout << endl;
@@ -328,7 +384,7 @@ double Tuner::tune_parameter(int &arr) {
     }
     else {
         arr -= delta_val*2;
-        error = mean_square_error();
+        error = mean_square_error(K_VAL, positions);
         //check if parameter decrease helps
         if (error < best_e) {
             best_e = error;
@@ -343,10 +399,11 @@ double Tuner::tune_parameter(int &arr) {
     return error;
 }
 
-double Tuner::tune_parameter(int arr[], int i) {
-    int delta_val = TUNING_DELTA; //value to change parameters by each iteration  
+double Tuner::tune_parameter(int arr[], int i, vector<TunerEntry> positions) {
+    int delta_val = TUNING_DELTA; //value to change parameters by each iteration
     arr[i] += delta_val;
-    double error = mean_square_error();
+
+    double error = mean_square_error(K_VAL, positions);
     cout << "New Error: ";
     printf("%.10f", error);
     cout << endl;
@@ -358,7 +415,7 @@ double Tuner::tune_parameter(int arr[], int i) {
     }
     else {
         arr[i] -= delta_val*2;
-        error = mean_square_error();
+        error = mean_square_error(K_VAL, positions);
         //check if parameter decrease helps
         if (error < best_e) {
             best_e = error;
@@ -373,11 +430,11 @@ double Tuner::tune_parameter(int arr[], int i) {
     return error;
 }
 
-double Tuner::tune_parameter(int arr[][64], int i, int j) {
+double Tuner::tune_parameter(float arr[][64], int i, int j, vector<TunerEntry> positions) {
     int delta_val = TUNING_DELTA; //value to change parameters by each iteration
     arr[i][j] += delta_val;
 
-    double error = mean_square_error();
+    double error = mean_square_error(K_VAL, positions);
     cout << "New Error: ";
     printf("%.10f", error);
     cout << endl;
@@ -389,7 +446,7 @@ double Tuner::tune_parameter(int arr[][64], int i, int j) {
     }
     else {
         arr[i][j] -= delta_val*2;
-        error = mean_square_error();
+        error = mean_square_error(K_VAL, positions);
         //check if parameter decrease helps
         if (error < best_e) {
             best_e = error;
@@ -404,44 +461,86 @@ double Tuner::tune_parameter(int arr[][64], int i, int j) {
     return error;
 }
 
+vector<TunerEntry> Tuner::read_txt_file(int positions=POSITIONS_NUM) {
+    vector<TunerEntry> position_fens;
+    float value;
+    fstream fen_file; 
+    //positions.txt should have fens and at the end the game result
+    //open the file and read fens to calculate mean square error
+    int pos = 0;
+    fen_file.open("src/tools/positions.txt",ios::in);
+    if (fen_file.is_open()) {
+        string fen;
+        while(getline(fen_file, fen)){ 
+            string outcome = fen.substr(fen.length()-5, 3);
+
+            float result = std::stof(outcome);
+            fen = fen.substr(0, fen.length()-5); //remove outcome from fen 
+            if (fen.find("1-0") != std::string::npos) {result = 1.0;}
+            else if (fen.find("0-1") != std::string::npos) {result = 0.0;}
+            else {result = 0.5;}
+
+            fen = fen.substr(0, fen.find("\"")-3);
+            position_fens.push_back(TunerEntry(fen, result));
+            //stop if we are done with the positions
+            if (pos >= positions) {break;}
+            pos++;
+        }
+        fen_file.close(); 
+    }
+    return position_fens;
+}
 
 //tuner for evaluation paramters
 void Tuner::tune(int time) {
     init_eval();
     improving = true; //value to check if parameter is improving
-    best_e = mean_square_error();
+
+    vector<TunerEntry> positions = read_txt_file(POSITIONS_NUM);
+    K_VAL = calculate_k(positions);
+
+    best_e = mean_square_error(K_VAL, positions);
     cout << "Starting error: ";
     printf("%.10f", best_e);
     cout << endl;
     auto start_time = steady_clock::now();  
 
+
+    TUNING_DELTA = 1;
     while (improving && duration_cast<seconds>(steady_clock::now() - start_time).count() < time) {
         improving = false;
         //run through parameters
-        //for (int p = PAWN_I; p <= KING_I; p++) {
+        for (int p = PAWN_I; p <= KING_I; p++) {
             // tune_parameter(MG_PIECE_VALUES, p); 
             // tune_parameter(EG_PIECE_VALUES, p); 
-            // tune_parameter(MG_MOBILITY, p); 
-            // tune_parameter(EG_MOBILITY, p); 
+            tune_parameter(MG_MOBILITY, p, positions); 
+            tune_parameter(EG_MOBILITY, p, positions); 
             // tune_parameter(KING_ATTACKS, p);
-            // for (int s = 0; s < 64; s++) {
-            //     if (p == PAWN_I && (s < 8 || s > 64-8)) {
-            //         continue;
-            //     }
-            //     tune_parameter(MG_PST_VALUES, p, s);
-            //     tune_parameter(EG_PST_VALUES, p, s);
-            // }
-        //}
-        // for (int f = 0; f < 8; f++) {
-        //     tune_parameter(PASSED_VALUE[f]); 
-        // }
-        // tune_parameter(EG_PASSED_BONUS);
-        // tune_parameter(MG_DOUBLED_VALUE);
-        // tune_parameter(EG_DOUBLED_VALUE);
-        // tune_parameter(MG_ISOLATED_VALUE);
-        // tune_parameter(EG_ISOLATED_VALUE);
-        tune_parameter(MG_BISHOP_PAIR);
-        tune_parameter(EG_BISHOP_PAIR);
+        //     for (int s = 0; s < 64; s++) {
+        //         if (p == PAWN_I && (s < 8 || s > 64-8)) {
+        //             continue;
+        //         }
+
+        //         float error = tune_parameter(MG_PST_VALUES, p, s, positions);
+        //         printf("%.10f", error);
+        //         cout << endl; 
+        //         error = tune_parameter(EG_PST_VALUES, p, s, positions);
+        //         printf("%.10f", error);
+        //         cout << endl;
+        //     }
+        }
+
+
+        for (int f = 0; f < 8; f++) {
+            tune_parameter(PASSED_VALUE, f, positions); 
+        }
+        tune_parameter(EG_PASSED_BONUS, positions);
+        tune_parameter(MG_DOUBLED_VALUE, positions);
+        tune_parameter(EG_DOUBLED_VALUE, positions);
+        tune_parameter(MG_ISOLATED_VALUE, positions);
+        tune_parameter(EG_ISOLATED_VALUE, positions);
+        // tune_parameter(MG_BISHOP_PAIR);
+        // tune_parameter(EG_BISHOP_PAIR);
         if (TUNING_DELTA > 1) {TUNING_DELTA--;}
     }
     //show table
@@ -484,7 +583,7 @@ void Tuner::tune(int time) {
     cout << "{" << endl;
     for (int p = PAWN_I; p <= KING_I; p++) {
         cout << "{" << endl;
-        for (int &val : MG_PST_VALUES[p]) {
+        for (float &val : MG_PST_VALUES[p]) {
             cout << val;  
             if (i >= 7) {
                 i = 0;
@@ -502,7 +601,7 @@ void Tuner::tune(int time) {
     cout << "{" << endl;
     for (int p = PAWN_I; p <= KING_I; p++) {
         cout << "{" << endl;
-        for (int &val : EG_PST_VALUES[p]) {
+        for (float &val : EG_PST_VALUES[p]) {
             cout << val;
             
             if (i >= 7) {
@@ -535,19 +634,16 @@ void Tuner::tune(int time) {
     cout << EG_BISHOP_PAIR << endl;
 }
 
-void calculate_k() {
-    float best_k = 1;
-    double best_e = 1e9;
+double Tuner::calculate_k(vector<TunerEntry> positions) {
+    double best_k = 0.45;
+    double best_e = Tuner::mean_square_error(best_k, positions);
     double res;
-    for ( float k = 0.6; k < 2; k+=0.05)
-    {
-	res = Tuner::mean_square_error(k, 100000);
-    if (res < best_e) {
-        best_k = k;
-        best_e = res;
+    for ( double k = 0.5; k < 2; k+=0.05) {
+        res = Tuner::mean_square_error(k, positions);
+        if (res < best_e) {
+            best_k = k;
+            best_e = res;
+        }
     }
-	printf("%.10f: %.10f\n", k, res);
-    }
-    printf("Best K: %.10f: %.10f\n", best_k, best_e);
-    cout << "Best K: " << best_k;
+    return best_k;
 }

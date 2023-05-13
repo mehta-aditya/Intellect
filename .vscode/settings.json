@@ -75,6 +75,7 @@
         "functional": "cpp",
         "numeric": "cpp",
         "ranges": "cpp",
-        "span": "cpp"
+        "span": "cpp",
+        "thread": "cpp"
     }
 }

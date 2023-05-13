@@ -19,8 +19,8 @@ constexpr int QUIESCE_MAX_DEPTH = 10;
 constexpr int REVERSE_FUTILITY_MARGIN = 80;
 constexpr int RAZORING_MARGIN = 200;
 constexpr int DELTA_MARGIN = 1000;
-constexpr int LMP_TABLE[7] = {0, 8, 10, 12, 15, 20, 22}; //lmp move cutoff
-constexpr int FUTILITY_MARGIN[6] = {0, 100, 150, 300, 450, 600}; //futility margin
+constexpr int LMP_TABLE[7] = {0, 8, 12, 16, 20, 25, 30}; //lmp move cutoff
+constexpr int FUTILITY_MARGIN[3] = {0, 120, 240}; //futility margin
 constexpr int MAX_HISTORY_V = 2000; //based on move ordering values
 
 //Values used in engine eval
@@ -101,7 +101,7 @@ class Engine{
             TT_MAX_SIZE = set_tt_memory(tt_table, DEFUALT_TT_MB);
             for (int d = 0; d < MAX_DEPTH; d++) {
                 for (int m = 0; m < 64; m++) {
-                    LMR_TABLE[d][m] = max(d/5, 2) + m/10;
+                    LMR_TABLE[d][m] = (int) (d/4 + m/8);
                 }
             }
         }

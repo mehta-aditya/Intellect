@@ -26,11 +26,14 @@ void Engine::score_moves(Board &board, vector<Moves> &moves, Moves tt_move, int 
     for (Moves &move : moves) {
         if (move == pv[0][ply]) {move.order = PV_O;}
         else if (move == tt_move) {move.order = TT_O;}
-        else if (move.flag == CAPTURE_F || move.flag == EN_PASSANT_F) {move.order = CAPTURE_O + MVV_LVA_TABLE[board.piece_at(move.to_square, board.turn^1)][move.piece];}
+        else if (move.flag == CAPTURE_F || move.flag == EN_PASSANT_F) {
+            move.captured = board.piece_at(move.to_square, board.turn^1);
+            move.order = (CAPTURE_O + MVV_LVA_TABLE[move.captured][move.piece]);
+            }
         else if (move == killers[0][ply]) {move.order = KILLER_O;}
         else if (move == killers[1][ply]) {move.order = KILLER_O-1;}
         else {
-            if (move.flag == NO_FLAG || move.flag == DOUBLE_PAWN_F) {move.order = history[board.turn][move.piece][move.to_square];}
+            if (move.flag == NO_FLAG || move.flag == DOUBLE_PAWN_F) {move.order = history[board.turn][move.piece][move.to_square] + MG_PST_VALUES[move.piece][move.to_square];}
             else if (move.flag == PROMOTE_F) {move.order = PROMOTION_O + PIECE_VALUES[move.promoted];}
             else if (move.flag == PROMOTE_CAP_F) {move.order = PROMOTION_O + PIECE_VALUES[move.promoted] + MVV_LVA_TABLE[board.piece_at(move.to_square, board.turn^1)][move.piece];}
             //give countermove bonus

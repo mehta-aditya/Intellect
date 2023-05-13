@@ -5,6 +5,7 @@
 U64 DOUBLED_MASK[64];
 U64 ISOLATED_MASK[64];
 U64 PASSED_MASK[2][64];
+U64 HALF_BOARD[2];
 
 void Engine::init_eval(){
     for (int square = 0; square < 64; square++) {
@@ -30,6 +31,8 @@ void Engine::init_eval(){
             PASSED_MASK[BLACK][square] &= ~Attacks::RANKS_BB[r];
         }
     }
+    HALF_BOARD[WHITE] = Attacks::RANKS_BB[0] | Attacks::RANKS_BB[1] | Attacks::RANKS_BB[2] | Attacks::RANKS_BB[3];
+    HALF_BOARD[BLACK] = Attacks::RANKS_BB[4] | Attacks::RANKS_BB[5] | Attacks::RANKS_BB[6] | Attacks::RANKS_BB[7];
 }
 
 //simple hand crafted eval
@@ -57,12 +60,21 @@ int Engine::evaluation(Board &board){
             while (piece_board) {
                 square = pop_lsb(&piece_board);
                 
-                if (p != PAWN_I && p != KING_I) {
+                if (p != KING_I) {
                     mobility_board = board.attackers_from(square, c, p);
                     //mobility value
-                    mobility_squares = Attacks::count_bits(mobility_board);
-                    mg_value[c] += (mobility_squares-MAX_PIECE_BITS[p]/2)*MG_MOBILITY[p];
-                    eg_value[c] += (mobility_squares-MAX_PIECE_BITS[p]/2)*EG_MOBILITY[p];  
+                    if (p == PAWN_I) {
+                        mobility_squares = Attacks::count_bits(mobility_board & HALF_BOARD[c]);
+                        mg_value[c] += (mobility_squares-1)*MG_MOBILITY[p];
+                        eg_value[c] += (mobility_squares-1)*EG_MOBILITY[p]; 
+                    }
+                    else {
+                        mobility_squares = Attacks::count_bits(mobility_board);
+                        mg_value[c] += (mobility_squares-MAX_PIECE_BITS[p]/2)*MG_MOBILITY[p];
+                        eg_value[c] += (mobility_squares-MAX_PIECE_BITS[p]/2)*EG_MOBILITY[p]; 
+                    }
+
+ 
                     //king safety values
                     king_safety = Attacks::count_bits(mobility_board & Attacks::KING_ATTACKS[king_squares[c^1]]) * KING_ATTACKS[p];
                     mg_value[c] += king_safety;
@@ -101,11 +113,12 @@ int Engine::evaluation(Board &board){
         
         //if only the king is left push the king to the edge of the board
         if (!(board.piece_co[c] ^ board.piece_boards[c][KING_I])) {
+            mg_value[c] += KING_EDGE[king_squares[c]];
             eg_value[c] += KING_EDGE[king_squares[c]];
         }    
     }
 
-    int phase = (game_phase * 256 + (MAX_PHASE / 2)) / MAX_PHASE;
+    float phase = (game_phase * 256 + (MAX_PHASE / 2)) / MAX_PHASE;
     value = ((mg_value[WHITE]-mg_value[BLACK]) * phase + (eg_value[WHITE]-eg_value[BLACK]) * (256-phase))/256;
     return (board.turn == WHITE) ? value : -value;
 }
@@ -123,7 +136,7 @@ bool Engine::is_insufficient(Board &board) {
         return true;
     }  
     //BK v K
-    else if (!(no_kings & ~board.piece_boards[BLACK][BISHOP_I])) {
+    else if (!(no_kings & ~board.piece_boards[WHITE][BISHOP_I])) {
         return true;
     }  
     else if (!(no_kings & ~board.piece_boards[BLACK][BISHOP_I])) {
