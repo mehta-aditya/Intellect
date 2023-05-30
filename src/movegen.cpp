@@ -61,31 +61,30 @@ U64 Board::attackers_to(int square, int color, U64 blockers) {
 //used for mobility calculations
 U64 Board::attackers_from(int square, int color, int piece) {
   U64 moves_board = EMPTY_BB;
-  U64 blockers = piece_co[color];
   switch(piece) {
-    case PAWN_I:
-      moves_board = Attacks::PAWN_ATTACKS[color][square];
-      return moves_board;
     case KNIGHT_I:
       moves_board = Attacks::KNIGHT_ATTACKS[square];
-      BITMASK_CLEAR(moves_board, blockers);
+      BITMASK_CLEAR(moves_board, piece_co[color]);
       return moves_board;
     case BISHOP_I:
       moves_board = Attacks::get_diag_attacks(square, piece_co[color]|piece_co[color^1]);
-      BITMASK_CLEAR(moves_board, blockers);
+      BITMASK_CLEAR(moves_board, piece_co[color]);
       return moves_board;      
     case ROOK_I:
       moves_board = Attacks::get_line_attacks(square, piece_co[color]|piece_co[color^1]);
-      BITMASK_CLEAR(moves_board, blockers);
+      BITMASK_CLEAR(moves_board, piece_co[color]);
       return moves_board;  
     case QUEEN_I:
       moves_board = Attacks::get_queen_attacks(square, piece_co[color]|piece_co[color^1]);
-      BITMASK_CLEAR(moves_board, blockers);
+      BITMASK_CLEAR(moves_board, piece_co[color]);
       return moves_board;  
     case KING_I:
       moves_board = Attacks::KING_ATTACKS[square];
-      BITMASK_CLEAR(moves_board, blockers);
+      BITMASK_CLEAR(moves_board, piece_co[color]);
       return moves_board;  
+    case PAWN_I:
+      moves_board = Attacks::PAWN_ATTACKS[color][square];
+      return moves_board;
     default:
       return 0;
   }

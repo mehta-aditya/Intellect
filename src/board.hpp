@@ -115,7 +115,7 @@ inline int get_lsb(U64 bb) {
 }
 
 //Gets index of least lsb and turns it to an integer
-inline static int pop_lsb(U64* bb) {
+inline int pop_lsb(U64* bb) {
     int i = __builtin_ctzll(*bb);
     *bb &= *bb - 1;
     return i;

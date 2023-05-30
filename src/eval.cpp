@@ -51,37 +51,69 @@ int Engine::evaluation(Board &board){
     for (int c = WHITE; c <= BLACK; c++) {
         for (int p = PAWN_I; p <= KING_I; p++){
             piece_board = board.piece_boards[c][p];
-            //bishop pair *retune values
-            // if (p == BISHOP_I && Attacks::count_bits(piece_board) == 2) {
-            //     mg_value[c] += MG_BISHOP_PAIR;
-            //     eg_value[c] += EG_BISHOP_PAIR;
-            // }
+            //bishop pair bonus
+            if (p == BISHOP_I && Attacks::count_bits(piece_board) == 2) {
+                mg_value[c] += MG_BISHOP_PAIR;
+                eg_value[c] += EG_BISHOP_PAIR;
+            }
 
             while (piece_board) {
                 square = pop_lsb(&piece_board);
                 
                 if (p != KING_I) {
-                    mobility_board = board.attackers_from(square, c, p);
-                    //mobility value
-                    if (p == PAWN_I) {
-                        mobility_squares = Attacks::count_bits(mobility_board & HALF_BOARD[c]);
-                        mg_value[c] += (mobility_squares-1)*MG_MOBILITY[p];
-                        eg_value[c] += (mobility_squares-1)*EG_MOBILITY[p]; 
-                    }
-                    else {
+                    //mobility values
+                    if (p != PAWN_I) {
+                        mobility_board = board.attackers_from(square, c, p);
                         mobility_squares = Attacks::count_bits(mobility_board);
-                        mg_value[c] += (mobility_squares-MAX_PIECE_BITS[p]/2)*MG_MOBILITY[p];
-                        eg_value[c] += (mobility_squares-MAX_PIECE_BITS[p]/2)*EG_MOBILITY[p]; 
+                        mg_value[c] += (mobility_squares)*MG_MOBILITY[p];
+                        eg_value[c] += (mobility_squares)*EG_MOBILITY[p]; 
+
+                        //king safety values
+                        king_safety = Attacks::count_bits(mobility_board & Attacks::KING_ATTACKS[king_squares[c^1]]) * KING_ATTACKS[p];
+                        mg_value[c] += king_safety*2;
+                        eg_value[c] += king_safety/2;
                     }
 
- 
-                    //king safety values
-                    king_safety = Attacks::count_bits(mobility_board & Attacks::KING_ATTACKS[king_squares[c^1]]) * KING_ATTACKS[p];
-                    mg_value[c] += king_safety;
-                    eg_value[c] += king_safety/2;
+                    //pawn structure eval
+                    //doubled pawn eval
+                    if (p == PAWN_I) {
+                        //doubled pawn values
+                        if (DOUBLED_MASK[square] & board.piece_boards[c][PAWN_I]) {
+                            mg_value[c] -= MG_DOUBLED_VALUE;
+                            eg_value[c] -= EG_DOUBLED_VALUE;
+                        }
+                        //isolated pawn eval
+                        if (!(ISOLATED_MASK[square] & board.piece_boards[c][PAWN_I])) {
+                            mg_value[c] -= MG_ISOLATED_VALUE;
+                            eg_value[c] -= EG_ISOLATED_VALUE;
+                        }
+                        
+                        //passed pawn eval
+                        if (!(PASSED_MASK[c][square] & board.piece_boards[c^1][PAWN_I])) {
+                            int rank = flip_board[c][square]/8;
+                            mg_value[c] += PASSED_VALUE[rank];
+                            eg_value[c] += PASSED_VALUE[rank] + EG_PASSED_BONUS; 
+                        }
+                    }
+
                     //update phase value based on pieces present
                     game_phase += PHASE_VALUES[p];
                 } 
+                //extra king safety eval
+                else { 
+                    int king_file = (king_squares[c] & 7); 
+                    
+                    if (!(Attacks::FILES_BB[king_file] & board.piece_boards[c][PAWN_I])) {
+                        mg_value[c] -= SEMIOPEN_KING_FILE_VALUE;
+                    }
+                    if (king_file != 0 && !(Attacks::FILES_BB[king_file-1] & board.piece_boards[c][PAWN_I])) {
+                        mg_value[c] -= SEMIOPEN_KING_FILE_VALUE;
+                    }
+                    if (king_file != 7 && !(Attacks::FILES_BB[king_file+1] & board.piece_boards[c][PAWN_I])) {
+                        mg_value[c] -= SEMIOPEN_KING_FILE_VALUE;
+                    }
+                }
+
                 //material value
                 mg_value[c] += MG_PIECE_VALUES[p];
                 eg_value[c] += EG_PIECE_VALUES[p];
@@ -92,36 +124,23 @@ int Engine::evaluation(Board &board){
 
             }
         }
-        //pawn structure eval
-        //doubled pawn eval
-        if (DOUBLED_MASK[square] & board.piece_boards[c][PAWN_I]) {
-            mg_value[c] -= MG_DOUBLED_VALUE;
-            eg_value[c] -= EG_DOUBLED_VALUE;
-        }
-        //isolated pawn eval
-        if (!(ISOLATED_MASK[square] & board.piece_boards[c][PAWN_I])) {
-            mg_value[c] -= MG_ISOLATED_VALUE;
-            eg_value[c] -= EG_ISOLATED_VALUE;
-        }
-        
-        //passed pawn eval
-        if (!(PASSED_MASK[c][square] & board.piece_boards[c^1][PAWN_I])) {
-            int rank = flip_board[c][square]/8;
-            mg_value[c] += PASSED_VALUE[rank];
-            eg_value[c] += PASSED_VALUE[rank] + EG_PASSED_BONUS; 
-        }
-        
-        //if only the king is left push the king to the edge of the board
-        if (!(board.piece_co[c] ^ board.piece_boards[c][KING_I])) {
-            mg_value[c] += KING_EDGE[king_squares[c]];
-            eg_value[c] += KING_EDGE[king_squares[c]];
-        }    
     }
+
+    //if no pawns are left or we have big advantage aka. king endgame; we push them to edge
+    if ((!(board.piece_boards[WHITE][PAWN_I]) && eg_value[BLACK] > eg_value[WHITE]) || (eg_value[BLACK] - 1000 > eg_value[WHITE] && game_phase <= 5)) {
+        mg_value[WHITE] += KING_EDGE[king_squares[WHITE]];
+        eg_value[WHITE] += KING_EDGE[king_squares[WHITE]];
+    }   
+    else if ((!(board.piece_boards[BLACK][PAWN_I]) && eg_value[WHITE] > eg_value[BLACK]) || (eg_value[WHITE] - 1000 > eg_value[BLACK] && game_phase <= 5)) {
+        mg_value[BLACK] += KING_EDGE[king_squares[BLACK]];
+        eg_value[BLACK] += KING_EDGE[king_squares[BLACK]];
+    }   
 
     float phase = (game_phase * 256 + (MAX_PHASE / 2)) / MAX_PHASE;
     value = ((mg_value[WHITE]-mg_value[BLACK]) * phase + (eg_value[WHITE]-eg_value[BLACK]) * (256-phase))/256;
     return (board.turn == WHITE) ? value : -value;
 }
+
 
 //checks for most common cases of insufficient material
 bool Engine::is_insufficient(Board &board) {
