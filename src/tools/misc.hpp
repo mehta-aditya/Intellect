@@ -21,8 +21,8 @@ namespace Tuner {
 void init_eval();
 
 const int PIECE_VALUES[6] = {100, 300, 300, 500, 900, 20000};
-const int PHASE_VALUES[6] = {0, 1, 1, 2, 4, 0};
-const int MAX_PHASE = 24;
+const int PHASE_VALUES[6] = {0, 1, 1, 2, 5, 0};
+const int MAX_PHASE = 26;
 const int flip_board[2][64] = {
 {
   0, 1, 2, 3, 4, 5, 6, 7,

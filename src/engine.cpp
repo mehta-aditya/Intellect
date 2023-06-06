@@ -108,7 +108,7 @@ inline int Engine::quiesce(Board &board, int alpha, int beta, int depth = QUIESC
 }
 
 //run a negamax (PVS) search
-inline int Engine::negamax(Board &board, int alpha, int beta, int depth, int ply=0, bool null=true) {
+inline int Engine::negamax(Board &board, int alpha, int beta, int depth, int ply=0, NodeInfo info = NodeInfo()) {
     int value;
     int best_v = -MAX_V;
     Moves best_m, tt_move;
@@ -116,8 +116,20 @@ inline int Engine::negamax(Board &board, int alpha, int beta, int depth, int ply
     TTFLAG flag = TT_ALPHA; //presume we will fail high
     bool is_pv = beta - alpha != 1; 
     bool not_tactical;
-    bool in_check = board.in_check(board.turn);
+
+    //store info
+    bool null = info.null; 
+    Moves prev_move = info.prev_move; 
+    bool in_check;
+    //if we know it is a check just use that
+    if (prev_move == Moves()) {
+        in_check = board.in_check(board.turn);
+    }
+    else {
+        in_check = info.prev_check;
+    }
     
+
     pv_len[ply] = ply;
 
     //Check for draw (threefold repition, 50 move and insufficient material)
@@ -140,17 +152,17 @@ inline int Engine::negamax(Board &board, int alpha, int beta, int depth, int ply
     TTEntry tt_entry;
     if(is_tt) {
         tt_entry = tt_table[board.zobrist_hash];
-        if(ply && tt_entry.depth >= depth && !is_pv) {   
+        if(ply && !is_pv && tt_entry.depth >= depth) {   
             if(tt_entry.flag == TT_EXACT) {return tt_entry.value;}
             else if (tt_entry.flag == TT_ALPHA && tt_entry.value <= alpha) {return tt_entry.value;}
             else if (tt_entry.flag == TT_BETA && tt_entry.value >= beta) {return tt_entry.value;}   
+            tt_move = (tt_entry.move);
         }
-        tt_move = (tt_entry.move);
     }   
 
     //IID reduction technique/IIR
     //If there was no value in transposition table and we meet other requirements we can reduce depth
-    if (depth >= 4 && !is_tt && is_pv) {depth--;}
+    if (depth >= 4 && !is_tt) {depth--;}
 
     //static evaluation of position
     int eval;
@@ -164,7 +176,7 @@ inline int Engine::negamax(Board &board, int alpha, int beta, int depth, int ply
 
     //reverse futility pruning/static null move pruning
     //if we are sufficiently above beta we can prune and meet requirements
-    if (!in_check && !is_pv && depth < 10
+    if (!in_check && !is_pv && depth < 6
         && eval - REVERSE_FUTILITY_MARGIN * depth >= beta 
         && eval >= beta && !(beta >= MATE_V-MAX_DEPTH || beta <= -MATE_V+MAX_DEPTH)) {
         return eval - REVERSE_FUTILITY_MARGIN * depth;
@@ -178,7 +190,7 @@ inline int Engine::negamax(Board &board, int alpha, int beta, int depth, int ply
         R = 3 + (depth/6);
         R = min(depth-1, R);
         board.push_null();
-        value = -negamax(board, -beta, -beta+1, depth-R-1, ply+1, false);
+        value = -negamax(board, -beta, -beta+1, depth-R-1, ply+1, NodeInfo(false, Moves(), eval, false));
         board.pop_null();
         //check for beta cutoff
         if (value >= beta) {
@@ -188,32 +200,18 @@ inline int Engine::negamax(Board &board, int alpha, int beta, int depth, int ply
 
     //razoring
     //if we are sufficiently below alpha then we can prune
-    if (depth <= 5 && !is_pv && !in_check && eval + RAZORING_MARGIN*depth <= alpha) {
-        value = quiesce(board, alpha, beta);
-        if (value <= alpha) {return value;}
-    }
+    // if (depth <= 5 && !is_pv && !in_check && eval + RAZORING_MARGIN*depth <= alpha) {
+    //     value = quiesce(board, alpha, beta);
+    //     if (value <= alpha) {return value;}
+    // }
 
     //move generation
     vector<Moves> moves = board.generate_psuedolegal_moves();
-    score_moves(board, moves, tt_move, ply);
+    score_moves(board, moves, tt_move, ply, prev_move);
     sort(moves.begin(), moves.end(), move_sort());
 
     //search moves
     for (Moves &move : moves) {
-        //check if a move is tactical or related to checks
-        not_tactical = move.captured == NO_PIECE && !in_check && move.promoted == PAWN_I;
-        // late move pruning (LMP)
-        // we can prune moves that are late in the node cause they are probably not as good
-        if (depth <= 5 && !is_pv && not_tactical && legal_moves > LMP_TABLE[depth]) {
-            continue;
-        }
-
-        // futility pruning *Needs more testing
-        //if we are far enough below alpha we can prune
-        // if (depth <= 2 && legal_moves > 1 && not_tactical && !is_pv 
-        // && eval + FUTILITY_MARGIN[depth] <= alpha) {
-        //     continue;
-        // }
 
         board.push(move); // play move
         //check move legality; if it isn't legal skip the move
@@ -221,39 +219,59 @@ inline int Engine::negamax(Board &board, int alpha, int beta, int depth, int ply
             board.pop();
             continue;
         }
+        bool next_check = board.in_check(board.turn); //the move gave a check
+        //check if a move is tactical or related to checks
+        not_tactical = move.captured == NO_PIECE && !in_check && move.promoted == PAWN_I && !next_check;
+
         //if legal increase legal move count
         legal_moves++;  
 
+        // // late move pruning (LMP)
+        // // we can prune moves that are late in the node cause they are probably not as good
+        if (depth <= 5 && !is_pv && not_tactical && legal_moves > LMP_TABLE[depth]) {
+            board.pop();
+            continue;
+        }
+
+        // // futility pruning *Needs more testing
+        // //if we are far enough below alpha we can prune
+        // if (depth <= 2 && legal_moves > 1 && not_tactical && !is_pv 
+        //     && eval + FUTILITY_MARGIN[depth] <= alpha) {
+        //     board.pop();
+        //     continue;
+        // }
 
         R = 0; //reduction
+
         //use late move reduction (LMR)
         //reduces search depth for moves that are late in the node
-        if (depth >= 3 && legal_moves >= 6 && not_tactical) {
-            R = LMR_TABLE[depth][legal_moves];
-            //don't reduce as much if it has good history
-            R -= killers[0][ply] == move || killers[1][ply] == move;
-            //*test variable reductions
-            // R -= countermoves[board.turn^1][move.from_square][move.to_square] == move;
+        //also don't reduce deep pawn pushes
+        if (depth >= 3 && legal_moves >= 4 && not_tactical \
+            && !(move.piece == PAWN_I && ((move.to_square >= 40 && board.turn) || (move.to_square < 24 && !board.turn)))) {
+            R = LMR_TABLE[depth][legal_moves] + !is_pv;
+
+            //don't reduce as much if it is a killer or counter
+            R -= (killers[0][ply] == move || killers[1][ply] == move || countermoves[board.turn^1][prev_move.from_square][prev_move.to_square] == move);
             // R -= history[board.turn^1][move.piece][move.to_square] / 1000;
             R = min(depth - 1, max(R, 0));
         }
 
         //zero window
         if (legal_moves > 1 || !is_pv) {  
-            value = -negamax(board, -alpha-1, -alpha, depth-1-R, ply+1, true); //search with lmr
+            value = -negamax(board, -alpha-1, -alpha, depth-1-R, ply+1, NodeInfo(true, move, eval, next_check)); //search with lmr
             //research the move at full depth if late move didn't fail low
             if (R && value > alpha) {
-                value = -negamax(board, -alpha-1, -alpha, depth-1, ply+1, true);
+                value = -negamax(board, -alpha-1, -alpha, depth-1, ply+1, NodeInfo(true, move, eval, next_check));
             }
 
             //search again using a full window
             if (value > alpha && value < beta) {
-                value = -negamax(board, -beta, -alpha, depth-1, ply+1, true);
+                value = -negamax(board, -beta, -alpha, depth-1, ply+1, NodeInfo(true, move, eval, next_check));
             } 
         }
         //full window
         else {
-            value = -negamax(board, -beta, -alpha, depth-1, ply+1, true); //search
+            value = -negamax(board, -beta, -alpha, depth-1, ply+1, NodeInfo(true, move, eval, next_check)); //search
         }
         board.pop(); //unmake move
 
@@ -273,11 +291,17 @@ inline int Engine::negamax(Board &board, int alpha, int beta, int depth, int ply
                 if (move.captured == NO_PIECE) {
                     killers[1][ply] = killers[0][ply];
                     killers[0][ply] = move;
-                    countermoves[board.turn][move.from_square][move.to_square] = move;
+                    countermoves[board.turn][prev_move.from_square][prev_move.to_square] = move;
                     history[board.turn][move.piece][move.to_square] += depth*depth;
-                    //don't go over maximum
+                    //age the histories
                     if (history[board.turn][move.piece][move.to_square] > MAX_HISTORY_V) {
-                        history[board.turn][move.piece][move.to_square] /= 2;
+                        for (int c = WHITE; c <= BLACK; c++) {
+                            for (int p = PAWN_I; p <= KING_I; p++) {
+                                for (int s = 0; s < 64; s++) {
+                                    history[c][p][s] /= 2;
+                                }
+                            }  
+                        }
                     }
                 }
                 break; //cutoff
@@ -288,10 +312,6 @@ inline int Engine::negamax(Board &board, int alpha, int beta, int depth, int ply
                 alpha = value;
                 flag = TT_EXACT; //we were in alpha-beta bounds
                 update_pv(move, ply);
-            }
-            //decrease history heuristic
-            else {
-                history[board.turn][move.piece][move.to_square] -= 1; 
             }
         }       
     }

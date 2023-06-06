@@ -14,14 +14,14 @@ constexpr int MAX_TIME = 300000000;
 constexpr int TIME_DIVIDER = 35;
 constexpr int OVERHEAD_TIME = 25;
 constexpr int DEFUALT_TT_MB = 128;
-constexpr int QUIESCE_MAX_DEPTH = 10;
+constexpr int QUIESCE_MAX_DEPTH = 8;
 //Values for different pruning and reduction methods
-constexpr int REVERSE_FUTILITY_MARGIN = 80;
+constexpr int REVERSE_FUTILITY_MARGIN = 100;
 constexpr int RAZORING_MARGIN = 200;
 constexpr int DELTA_MARGIN = 1000;
-constexpr int LMP_TABLE[7] = {0, 8, 12, 16, 20, 25, 30}; //lmp move cutoff
+constexpr int LMP_TABLE[6] = {0, 16, 20, 24, 28, 30}; //lmp move cutoff
 constexpr int FUTILITY_MARGIN[3] = {0, 120, 240}; //futility margin
-constexpr int MAX_HISTORY_V = 2000; //based on move ordering values
+constexpr int MAX_HISTORY_V = 50000; //based on move ordering values
 
 //Values used in engine eval
 enum VALUES : int {
@@ -44,7 +44,7 @@ struct move_sort {
     }
 };
 
-//ponder, mate and nodes has not been implemented yet
+//ponder, mate and nodes has not been implemented yet in UCI
 struct EngineLimits {
     vector<Moves> search_moves;
     bool ponder, infinite;
@@ -75,6 +75,20 @@ struct TTEntry{
 };
 typedef unordered_map<U64, TTEntry> TTMAP;
 
+//used to pass down info to child node
+struct NodeInfo {
+    bool null; //
+    Moves prev_move; // used for countermove 
+    int prev_eval;
+    bool prev_check;
+    NodeInfo(bool n = true, Moves prev_m = Moves(), int prev_e=0, bool prev_c=false) {
+        null = n; 
+        prev_move = prev_m; 
+        prev_eval = prev_e;
+        prev_check = prev_c;
+    }
+};
+
 class Engine{
     public: 
         //init
@@ -101,7 +115,8 @@ class Engine{
             TT_MAX_SIZE = set_tt_memory(tt_table, DEFUALT_TT_MB);
             for (int d = 0; d < MAX_DEPTH; d++) {
                 for (int m = 0; m < 64; m++) {
-                    LMR_TABLE[d][m] = (int) (d/4 + m/8);
+                    LMR_TABLE[d][m] = (int) (max(1, d/4));
+                    //LMR_TABLE[d][m] = (int) (0.75 + log(d) * log(m) / 2.25);
                 }
             }
         }
@@ -109,7 +124,7 @@ class Engine{
         inline bool check_limits(int depth);
 
         inline int quiesce(Board &board, int alpha, int beta, int depth);
-        inline int negamax(Board &board, int alpha, int beta, int depth, int ply, bool null);
+        inline int negamax(Board &board, int alpha, int beta, int depth, int ply, NodeInfo info);
         inline void iterative_deepening(Board& board);
         void search(Board& board, EngineLimits &limits);
 
@@ -123,7 +138,7 @@ class Engine{
         bool is_insufficient(Board &board);
 
         //sort.cpp
-        void score_moves(Board &board, vector<Moves> &moves, Moves tt_move, int ply);
+        void score_moves(Board &board, vector<Moves> &moves, Moves tt_move, int ply, Moves prev_move);
         void score_quiesce_moves(Board &board, vector<Moves> &moves, Moves tt_move);  
         bool see(Board &board, Moves move, int threshold);
 
