@@ -248,8 +248,7 @@ inline int Engine::negamax(Board &board, int alpha, int beta, int depth, int ply
         //also don't reduce deep pawn pushes
         if (depth >= 3 && legal_moves >= 4 && not_tactical \
             && !(move.piece == PAWN_I && ((move.to_square >= 40 && board.turn) || (move.to_square < 24 && !board.turn)))) {
-            R = LMR_TABLE[depth][legal_moves];
-            //R = (int) (1 + (depth / 5));            
+            R = LMR_TABLE[depth][legal_moves] + !is_pv;
 
             //don't reduce as much if it is a killer or counter
             R -= (killers[0][ply] == move || killers[1][ply] == move || countermoves[board.turn^1][prev_move.from_square][prev_move.to_square] == move);

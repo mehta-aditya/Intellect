@@ -27,62 +27,62 @@ float MG_PST_VALUES[6][64] =
 {
 {
 0, 0, 0, 0, 0, 0, 0, 0,
--2, 38, -23, 37, 25, 31, -38, -62,
--61, -30, -26, -26, -20, 61, -32, -65,
+14, 22, -39, 21, 9, 15, -54, -62,
+-61, -30, -10, -26, -20, 61, -32, -65,
 -32, -14, -21, -15, -8, -36, -22, -40,
 -45, -19, -20, -10, -4, -14, -33, -57,
 -41, -31, -12, -21, -9, -28, -1, -32,
--38, -12, -32, -26, -20, 7, 21, -34, 
+-38, -12, -32, -26, -20, 7, 21, -34,
 0, 0, 0, 0, 0, 0, 0, 0,
 },
 {
--265, -136, -76, -54, 130, -120, -79, -75,
--64, 1, 70, 39, 62, 88, -39, -32,
--1, 23, 3, 52, 97, 171, 67, 10,
+-265, -136, -92, -38, 114, -136, -95, -59,
+-64, 1, 70, 39, 62, 88, -55, -32,
+15, 23, 3, 52, 97, 171, 51, 10,
 18, 9, -4, 24, 3, 6, -5, 36,
 9, -16, 27, 17, 27, 14, 3, -9,
 -14, 0, 19, 19, 5, 20, 16, -15,
--20, -18, 22, 19, 21, 26, 10, 3, 
--49, -6, -40, 3, -12, -13, -6, -24,
+-20, -18, 22, 19, 21, 26, 10, 3,
+-49, -6, -40, 3, -12, -13, -6, -40,
 },
 {
--44, -76, -72, -96, -110, -50, 31, -38,
-11, 10, 6, 51, -36, 79, 14, 37,
--17, -4, 30, 35, 37, 63, 94, 21,
+-44, -76, -72, -112, -110, -50, 15, -54, 
+11, -6, 6, 51, -36, 79, -2, 37,
+-17, -4, 30, 35, 37, 47, 110, 21,
 -11, 2, 21, 21, 23, -11, 19, 18,
 -4, 26, 5, 45, 24, 21, 6, -10,
 36, 44, 29, 14, 26, 33, 25, 14,
--11, 52, 4, 21, 28, 63, 58, 29, 
+-11, 52, 4, 21, 28, 63, 58, 29,
 46, 27, 29, 16, 20, 10, 27, 13,
 },
 {
--23, 10, -35, 17, 53, 68, -30, -9,
--37, -59, -25, -8, -14, 132, -25, -35,
--15, -49, -30, 0, 15, 9, 45, 9,
--57, -16, -34, 13, -38, 10, -28, -25,
+-39, -6, -51, 1, 53, 84, -46, -25,
+-37, -75, -25, -24, -30, 132, -41, -51, 
+-15, -49, -30, 0, 15, 9, 29, 9,
+-57, 0, -34, 13, -38, 10, -28, -25,
 -45, -47, -17, -56, -17, -45, -85, -55,
--17, -40, -17, -21, -30, -19, 23, -4,
--35, -70, -36, -43, -48, -16, -24, -89, 
+-17, -40, -33, -21, -30, -19, 23, -4,
+-35, -70, -36, -43, -48, -16, -40, -89,
 -22, -18, -8, 0, 4, 0, -46, -19,
 },
 {
--88, 35, 73, 25, 33, 64, -4, 16,
--55, -54, -59, -100, -106, 14, -2, 75,
--23, -42, -42, -26, -7, 21, -45, -5,
+-88, 35, 73, 9, 33, 48, -20, 0,
+-55, -70, -59, -100, -106, 14, -18, 75,
+-23, -42, -42, -26, -7, 5, -45, -5, 
 -26, -41, -24, -52, -20, -33, 8, -25,
 -11, -50, -37, -22, -25, -14, -7, -27,
 -53, -10, -2, -13, -10, -9, -27, -28,
--18, -7, -1, 3, 14, 26, 33, -20, 
+-18, -7, -1, 3, 14, 26, 33, -20,
 -2, 1, 6, 11, -16, 15, -44, 2,
 },
 {
--124, 37, 39, 59, -65, -46, 76, -53,
--55, 23, 43, -6, -37, 26, -84, 37,
-52, 35, -41, 41, -49, 53, 38, -15,
-3, 47, -58, -31, -115, -4, 16, -81,
--20, 44, 69, -21, -25, -37, -50, -64,
--28, 45, 4, -67, -37, -15, -9, -6,
--53, -44, -36, -70, -63, -17, 17, -3, 
+-108, 21, 55, 75, -49, -62, 92, -69,
+-71, 39, 59, 10, -37, 26, -100, 53,
+68, 51, -57, 57, -33, 53, 54, -31,
+19, 63, -42, -15, -131, 12, 32, -65,
+-20, 60, 85, -21, -9, -37, -50, -80,
+-12, 61, 4, -67, -37, -31, -9, -6,
+-69, -60, -52, -70, -63, -33, 17, -3,
 -80, 21, 19, -88, -1, -28, 21, -3,
 },
 };
@@ -91,59 +91,59 @@ float EG_PST_VALUES[6][64] =
 {
 {
 0, 0, 0, 0, 0, 0, 0, 0,
-158, 124, 132, 108, 74, 123, 157, 153,
+142, 124, 132, 108, 74, 123, 141, 169, 
 92, 75, 53, 39, 29, 0, 46, 70,
 10, 11, -5, -20, -24, -8, -2, -9,
 -16, -13, -26, -28, -37, -22, -17, -20,
 -13, 0, -37, -23, -27, -20, -25, -27,
--5, -5, -4, -6, -9, -16, -26, -24,
-0, 0, 0, 0, 0, 0, 0, 0, 
+-5, -21, -4, -6, -9, -16, -26, -24,
+0, 0, 0, 0, 0, 0, 0, 0,
 },
 {
--49, -29, -53, 7, -22, -6, -17, -51,
+-33, -29, -69, 7, -22, -6, -17, -51,
 29, -18, -56, -55, -13, -24, 2, -36,
--39, -21, 5, -18, -8, -23, -11, -16,
--5, 21, 23, 34, 30, 40, 13, -44,
+-39, -21, 5, -18, 8, -23, -11, -16, 
+-5, 21, 23, 50, 30, 40, 13, -44,
 -2, 35, 14, 24, 16, 7, 11, -12,
 -42, 6, -5, 18, 26, 2, 0, 16,
--16, -54, -10, 10, -2, 25, -34, -10,
--53, -6, 13, 1, 1, 2, -8, 20, 
+-32, -54, -10, 10, -2, 25, -34, -10,
+-53, -6, 13, 1, 1, -14, -8, 36,
 },
 {
 2, -42, -22, -4, -26, 5, 2, 15,
--49, -15, -17, -40, 5, -25, -11, -4,
--11, -9, -21, -13, 4, 6, -39, -6,
-2, -1, -17, 14, -1, -23, -27, -26,
+-49, -15, -17, -40, 5, -25, -11, -20,
+-11, -9, -21, -13, 4, 6, -55, -6, 
+2, -1, -17, 14, -17, -23, -27, -26,
 -35, -24, -5, 9, -2, -4, -19, -40,
--14, -7, -15, 11, 3, 3, 6, -5,
-15, -33, -16, 3, -15, -1, -18, -10,
--36, -31, -32, -1, -14, -18, -8, -34,
-}, 
+-14, -7, -31, 11, 3, -13, -10, -5,
+-1, -49, -16, -13, -15, -1, -18, -26,
+-52, -31, -48, -17, -30, -34, -8, -34,
+},
 {
 18, 3, -15, -10, -10, -15, -4, -2,
 -13, 17, -3, -1, -11, -33, 9, 1,
-6, 5, -1, -11, -29, -38, -30, -22,
+6, 5, -1, -11, -29, -38, -30, -22, 
 3, -12, 3, -20, -12, -9, -26, -23,
 -1, 9, -23, 6, -17, -13, -14, -24,
--1, 6, -7, -11, 0, -8, -50, -6,
-20, 8, 19, 4, 1, -20, 3, -18,
+-1, 6, -7, -11, 0, -8, -50, -22,
+4, -8, 19, 4, -15, -20, 3, -18,
 -3, -6, -7, -14, -22, -21, -21, -30,
 },
 {
-65, 33, 4, 27, -59, 23, 56, 48, 
-54, 41, 39, 103, 76, 32, 16, -78,
--21, -17, 53, 19, 99, 5, 57, -48,
+81, 33, 4, 27, -75, 39, 56, 32,
+54, 57, 39, 119, 76, 32, 16, -78,
+-21, -1, 53, 19, 99, 5, 57, -48, 
 22, 26, -23, 55, 3, 12, 36, -10,
-3, 60, 69, 8, 28, 1, 66, 52,
-3, -2, 29, 0, 28, 34, 72, 59,
-47, 39, -13, 37, -16, -34, -54, 52,
--15, -36, 20, -6, 61, -75, 45, -4,
+3, 76, 69, 8, 28, 1, 66, 52,
+3, -2, 29, 16, 28, 34, 56, 59,
+47, 55, -13, 37, -16, -34, -54, 68,
+-15, -36, 20, -22, 61, -75, 29, -4,
 },
 {
--116, 9, -19, -17, -26, 13, 15, -89,
-1, 39, -19, -21, 31, 14, 31, 4, 
--60, -5, 22, -9, 10, 7, 19, 11,
--48, 1, 10, 23, 9, 15, 10, 16,
+-116, 9, -19, -33, -10, 29, 15, -73,
+17, 39, -19, -21, 31, 14, 31, 20,
+-44, -5, 22, -9, 10, 7, 19, 11,
+-48, 1, 10, 23, 9, 15, 10, 16, 
 -35, -31, -3, 24, 14, 18, 16, 1,
 -15, -8, 7, 24, 25, 20, -2, -14,
 -20, 9, 27, 33, 29, 17, -5, -17,
@@ -174,7 +174,7 @@ U64 HALF_BOARD[2];
 bool improving;
 double best_e;
 double K_VAL = 1.6;
-int POSITIONS_NUM = 1000000;
+int POSITIONS_NUM = 200000;
 int TUNING_DELTA = 1;
 const int THREADS = 4;
 
@@ -323,68 +323,10 @@ double Tuner::mean_square_error(float K, vector<TunerEntry> positions) {
         board.set_fen(entry.fen);
         value = evaluation_tune(board);
         sigmoid = 1/(1 + pow(10, -K*value*0.01));
-
         error += pow(entry.result - sigmoid, 2);   
     }
     return error/positions.size();
 }
-
-// double Tuner::thread_mse(float K, vector<TunerEntry> positions, double* error) {
-//     Board board;
-//     float value;
-//     double result, sigmoid;
-//     int pos = 1; // keeps track of position number
-    
-//     for (TunerEntry entry : positions) {
-//         board.set_fen(entry.fen);
-//         value = evaluation_tune(board);
-//         sigmoid = 1/(1 + pow(10, -K*value*0.01));
-
-//         *error += pow(entry.result - sigmoid, 2);   
-//     }
-// }
-
-// double Tuner::threaded_mse(float K, vector<TunerEntry> positions) {
-//     double errors[THREADS] = {0};
-//     vector<TunerEntry> batches[THREADS];
-
-//     int split_size = positions.size() / THREADS;
-//     int current = 0;
-//     for (int t = 0; t < THREADS; t++) {
-
-//         int i = 0;
-
-//         while (i <= split_size && (i + current) < positions.size()) {
-//             batches[t].push_back(positions[current + i]);
-//             i++;
-//         }
-
-//         current += i;
-//     }
-
-//     if (THREADS > 1) {
-//         std::vector<std::thread> workers;
-
-//         for (int t = 0; t < THREADS; t++) {
-//             workers.push_back(std::thread(thread_mse, K_VAL, &batches[t], &errors[t]));
-//         }
-
-//         // Wait for the workers to complete their work, and then join them
-//         for (int t = 0; t < THREADS; t++) {
-//             workers[t].join();
-//         }
-
-//     }
-//     else { // Don't start up any workers. Just run the thread_batch function
-//         thread_mse(K_VAL, &batches[0], &errors[0]);
-//     }
-//     double avg = 0;
-//     for (int i = 0; i < THREADS; i++) {
-//         avg += errors[i];
-//     }
-// 	return (avg / double(positions.size()));
-// }
-
 
 //tune a specific parameter we pass through
 double Tuner::tune_parameter(int &arr, vector<TunerEntry> positions) {
@@ -451,6 +393,12 @@ double Tuner::tune_parameter(int arr[], int i, vector<TunerEntry> positions) {
 
 double Tuner::tune_parameter(float arr[][64], int i, int j, vector<TunerEntry> positions) {
     int delta_val = TUNING_DELTA; //value to change parameters by each iteration
+    // int ridge_loss = 0;
+    // for (int sq = 0; sq < 64; sq++) {
+    //     if (sq != j) {
+    //         ridge_loss += pow(arr[i][sq],2);
+    //     }
+    // }
     arr[i][j] += delta_val;
 
     double error = mean_square_error(K_VAL, positions);
@@ -526,7 +474,7 @@ void Tuner::tune(int time) {
     auto start_time = steady_clock::now();  
 
 
-    TUNING_DELTA = 1;
+    TUNING_DELTA = 16;
     while (improving && duration_cast<seconds>(steady_clock::now() - start_time).count() < time) {
         improving = false;
         //run through parameters
@@ -536,14 +484,14 @@ void Tuner::tune(int time) {
             // tune_parameter(MG_MOBILITY, p, positions); 
             // tune_parameter(EG_MOBILITY, p, positions); 
             //tune_parameter(KING_ATTACKS, p, positions);
-            // for (int s = 0; s < 64; s++) {
-            //     if (p == PAWN_I && (s < 8 || s > 64-8)) {
-            //         continue;
-            //     }
+            for (int s = 0; s < 64; s++) {
+                if (p == PAWN_I && (s < 8 || s > 64-8)) {
+                    continue;
+                }
 
-            //     tune_parameter(MG_PST_VALUES, p, s, positions);
-            //     tune_parameter(EG_PST_VALUES, p, s, positions);
-            // }
+                tune_parameter(MG_PST_VALUES, p, s, positions);
+                tune_parameter(EG_PST_VALUES, p, s, positions);
+            }
         }
 
 
@@ -551,12 +499,12 @@ void Tuner::tune(int time) {
         //     tune_parameter(PASSED_VALUE, f, positions); 
         // }
         // tune_parameter(EG_PASSED_BONUS, positions);
-        tune_parameter(MG_DOUBLED_VALUE, positions);
-        tune_parameter(EG_DOUBLED_VALUE, positions);
-        tune_parameter(MG_ISOLATED_VALUE, positions);
-        tune_parameter(EG_ISOLATED_VALUE, positions);
-        tune_parameter(MG_BISHOP_PAIR, positions);
-        tune_parameter(EG_BISHOP_PAIR, positions);
+        // tune_parameter(MG_DOUBLED_VALUE, positions);
+        // tune_parameter(EG_DOUBLED_VALUE, positions);
+        // tune_parameter(MG_ISOLATED_VALUE, positions);
+        // tune_parameter(EG_ISOLATED_VALUE, positions);
+        // tune_parameter(MG_BISHOP_PAIR, positions);
+        // tune_parameter(EG_BISHOP_PAIR, positions);
         if (TUNING_DELTA > 1) {TUNING_DELTA /= 2;}
         if (!improving) {break;}
     }

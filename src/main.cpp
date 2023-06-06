@@ -5,8 +5,9 @@
 
 int main(){
   Attacks::init();
-  //calculate_k();
-  //Tuner::tune(360);
+
+  // Tuner::tune(3600);
+  
   UCI::init();
 
   return 0;

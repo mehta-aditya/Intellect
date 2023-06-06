@@ -16,7 +16,7 @@ constexpr int OVERHEAD_TIME = 25;
 constexpr int DEFUALT_TT_MB = 128;
 constexpr int QUIESCE_MAX_DEPTH = 8;
 //Values for different pruning and reduction methods
-constexpr int REVERSE_FUTILITY_MARGIN = 150;
+constexpr int REVERSE_FUTILITY_MARGIN = 100;
 constexpr int RAZORING_MARGIN = 200;
 constexpr int DELTA_MARGIN = 1000;
 constexpr int LMP_TABLE[6] = {0, 16, 20, 24, 28, 30}; //lmp move cutoff
